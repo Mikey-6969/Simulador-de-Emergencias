@@ -27,10 +27,12 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 ### Cuentas
 
-Sin registro público. Catálogo y contraseñas en `docs/CREDENCIALES_DEMO.md`.
+Sin registro público. Listado de correos en `docs/CREDENCIALES_DEMO.md`.
+La contraseña se define solo en `MILA_DEMO_PASSWORD` (entorno / secrets), nunca en el repo.
 
 ```bash
-MILA_DEMO_PASSWORD='MilaZona2026*' npm run db:seed
+export MILA_DEMO_PASSWORD='…'
+npm run db:seed
 ```
 
 ## Documentación

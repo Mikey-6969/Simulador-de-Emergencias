@@ -22,17 +22,17 @@ Base incluida (sprints previos necesarios para demo):
 
 ## Cuentas
 
-Ver `docs/CREDENCIALES_DEMO.md` (admin, 4 especialistas, 8 técnicos, 40 clientes).
-Sin registro público: solo login.
+Ver `docs/CREDENCIALES_DEMO.md` (correos: admin, 4 especialistas, 8 técnicos, 40 clientes).
+Sin registro público: solo login. Contraseña solo vía `MILA_DEMO_PASSWORD` en el entorno.
 
 ## Cómo correr
 
 ```bash
 cp .env.example .env
-# AUTH_SECRET + MILA_DEMO_PASSWORD + DATABASE_URL
+# AUTH_SECRET + DATABASE_URL (+ MILA_DEMO_PASSWORD solo para seed local)
 npm install
 npx prisma db push
-MILA_DEMO_PASSWORD='MilaZona2026*' npm run db:seed
+npm run db:seed
 npm run dev
 ```
 

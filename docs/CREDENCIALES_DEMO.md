@@ -1,10 +1,13 @@
-# Credenciales MILA (catálogo demo)
+# Cuentas MILA (catálogo)
 
-Contraseña común de todas las cuentas:
+La contraseña **no** se guarda en el repositorio. Defínela solo en el entorno:
 
+```bash
+export MILA_DEMO_PASSWORD='…tu contraseña fuerte…'
+npm run db:seed
 ```
-MilaZona2026*
-```
+
+En la app publicada, configura el secret `MILA_DEMO_PASSWORD` (y `AUTH_SECRET`) en Cursor Secrets. El seed **no** corre en el build de producción.
 
 ## Admin
 
@@ -13,8 +16,6 @@ MilaZona2026*
 | admin@mila.app | ADMIN |
 
 ## Especialistas (1 por zona)
-
-Escalan cuando el técnico de campo no puede resolver.
 
 | Correo | Zona |
 |--------|------|
@@ -40,20 +41,7 @@ Escalan cuando el técnico de campo no puede resolver.
 
 Patrón: `cliente.<zona>.<01-10>@mila.app`
 
-### Norte
-cliente.norte.01@mila.app … cliente.norte.10@mila.app
-
-### Sur
-cliente.sur.01@mila.app … cliente.sur.10@mila.app
-
-### Oriente
-cliente.oriente.01@mila.app … cliente.oriente.10@mila.app
-
-### Occidente
-cliente.occidente.01@mila.app … cliente.occidente.10@mila.app
-
-## Cargar / refrescar en base de datos
-
-```bash
-MILA_DEMO_PASSWORD='MilaZona2026*' npm run db:seed
-```
+- Norte: `cliente.norte.01@mila.app` … `cliente.norte.10@mila.app`
+- Sur: `cliente.sur.01@mila.app` … `cliente.sur.10@mila.app`
+- Oriente: `cliente.oriente.01@mila.app` … `cliente.oriente.10@mila.app`
+- Occidente: `cliente.occidente.01@mila.app` … `cliente.occidente.10@mila.app`
