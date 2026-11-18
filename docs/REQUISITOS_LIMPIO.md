@@ -148,7 +148,7 @@ Detalle completo: `docs/source/Product_Backlog_13_Semanas.xlsx`.
 
 | Fuente | Stack declarado |
 |--------|-----------------|
-| Decisión actual (producto MILA) | **Next.js + TypeScript + MySQL (Prisma) + n8n + agente IA** |
+| Decisión actual (producto MILA) | **Next.js + TypeScript + PostgreSQL (Prisma) + n8n + agente IA** (+ DDL MySQL de entrega) |
 | Documentos antiguos Sprint 2 | Django/PostgreSQL/Bootstrap — **obsoletos**; no aplican a la implementación |
 
 **Decisión:** stack moderno desplegable con MySQL. DDL en `docs/sql/mila.sql`.

@@ -8,7 +8,7 @@
 |------|------------|--------|
 | Frontend + API | **Next.js (App Router) + TypeScript** | Una sola app desplegable, consolas cliente/especialista |
 | UI | **Tailwind CSS** (diseño propio, sin Bootstrap) | Rápido, responsive, marca MILA |
-| Datos | **MySQL / MariaDB + Prisma** | Pedido del proyecto + ORM tipado |
+| Datos | **PostgreSQL + Prisma** (runtime) · DDL MySQL en `docs/sql/mila.sql` | Despliegue Cursor Apps + entrega académica |
 | Auth | Sesión JWT en cookie httpOnly (`jose` + `bcryptjs`) | Roles: cliente, técnico, coordinador, admin |
 | Automatización | **n8n** vía webhooks | Nueva solicitud, escalamiento, asignación, cierre |
 | Agente IA | API interna + hook n8n (o fallback local) | Diagnóstico remoto antes de visita |

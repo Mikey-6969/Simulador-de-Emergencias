@@ -1,20 +1,18 @@
 services:
-  mysql:
-    image: mysql:8.4
+  postgres:
+    image: postgres:16
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: mila
-      MYSQL_USER: mila
-      MYSQL_PASSWORD: mila_dev_pass
-      MYSQL_ROOT_PASSWORD: root_dev_pass
+      POSTGRES_DB: mila
+      POSTGRES_USER: mila
+      POSTGRES_PASSWORD: mila_dev_pass
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mila_mysql:/var/lib/mysql
-    command: ["--default-authentication-plugin=caching_sha2_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+      - mila_pg:/var/lib/postgresql/data
 
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.82.4
     restart: unless-stopped
     ports:
       - "5678:5678"
@@ -24,9 +22,10 @@ services:
       N8N_PROTOCOL: http
       WEBHOOK_URL: http://localhost:5678/
       GENERIC_TIMEZONE: America/Bogota
+      N8N_ENCRYPTION_KEY: mila-dev-encryption-key-32chars
     volumes:
       - mila_n8n:/home/node/.n8n
 
 volumes:
-  mila_mysql:
+  mila_pg:
   mila_n8n:

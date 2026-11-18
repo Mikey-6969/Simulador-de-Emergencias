@@ -18,7 +18,7 @@ Base incluida (sprints previos necesarios para demo):
 - Alta/consulta de solicitudes
 - Agente IA al crear caso (local o OpenAI si hay API key)
 - Webhooks n8n (`N8N_WEBHOOK_URL`) + `AutomationLog`
-- MySQL con Prisma + DDL en `docs/sql/mila.sql`
+- PostgreSQL con Prisma en runtime + DDL MySQL académico en `docs/sql/mila.sql`
 
 ## Cuentas demo
 
@@ -33,7 +33,7 @@ Base incluida (sprints previos necesarios para demo):
 
 ```bash
 cp .env.example .env
-# configurar DATABASE_URL MySQL
+# configurar DATABASE_URL PostgreSQL
 npm install
 npx prisma db push
 npm run db:seed

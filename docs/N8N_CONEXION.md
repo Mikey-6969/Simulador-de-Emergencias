@@ -1,32 +1,37 @@
 # Conectar MILA ↔ n8n
 
-## 1. Levantar n8n (opcional con Docker)
+## 1. Levantar n8n
+
+Sin Docker (recomendado en este repo):
 
 ```bash
-docker compose up -d n8n
+npm run n8n
 ```
 
-UI: http://localhost:5678
+UI: http://127.0.0.1:5678
+
+Con Docker: `docker compose up -d n8n`
 
 ## 2. Importar flujo
 
-1. En n8n: **Workflows → Import**
-2. Archivo: `docs/n8n/mila-sprint5-workflow.json`
-3. Activa el workflow
-4. Copia la URL del nodo Webhook (ej. `http://localhost:5678/webhook/mila-events`)
+1. Login en n8n (primera vez crea el owner)
+2. **Workflows → Import from File**
+3. Archivo: `docs/n8n/mila-sprint5-workflow.json`
+4. Activa el toggle del workflow
+5. URL producción: `http://127.0.0.1:5678/webhook/mila-events`
 
 ## 3. Configurar MILA
 
-En `.env`:
-
 ```env
-N8N_WEBHOOK_URL=http://localhost:5678/webhook/mila-events
-OPENAI_API_KEY=  # opcional
+N8N_WEBHOOK_URL=http://127.0.0.1:5678/webhook/mila-events
+OPENAI_API_KEY=   # opcional
+DATABASE_URL=postgresql://...
+AUTH_SECRET=...
 ```
 
 Reinicia `npm run dev`.
 
-## 4. Eventos que envía MILA
+## 4. Eventos
 
 | flow | Cuándo |
 |------|--------|
@@ -36,11 +41,14 @@ Reinicia `npm run dev`.
 | `ticket.escalated` | Escalamiento |
 | `ticket.assigned` | Asignación de técnico |
 
-Si `N8N_WEBHOOK_URL` está vacío, el evento se guarda igual en `AutomationLog` (visible en `/especialista/automatizacion`).
+Cada emisión queda en `AutomationLog` (`/especialista/automatizacion`).
 
 ## 5. Probar
 
-1. Login `cliente@mila.app` / `Mila123*`
-2. Registrar caso (wizard servicio → sede → detalle)
-3. En n8n debe llegar el webhook
-4. En MILA: `/especialista/automatizacion` muestra el log
+```bash
+curl -X POST http://127.0.0.1:5678/webhook/mila-events \
+  -H 'Content-Type: application/json' \
+  -d '{"flow":"ticket.created","number":"MILA-TEST"}'
+```
+
+Luego crea un caso en `/cliente/registrar` y verifica ejecución en n8n + log en MILA.

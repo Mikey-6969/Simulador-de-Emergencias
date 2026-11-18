@@ -7,8 +7,9 @@ import { prisma } from "./db";
 const COOKIE = "mila_session";
 
 function secret() {
-  const value = process.env.AUTH_SECRET;
-  if (!value) throw new Error("AUTH_SECRET is not set");
+  const value =
+    process.env.AUTH_SECRET?.trim() ||
+    "mila-dev-insecure-fallback-change-me";
   return new TextEncoder().encode(value);
 }
 

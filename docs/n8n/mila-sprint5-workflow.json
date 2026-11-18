@@ -1,70 +1,38 @@
 {
-  "name": "MILA Sprint 5 Events",
+  "name": "MILA Events Webhook",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "mila-events",
-        "responseMode": "onReceived",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "webhook-mila",
       "name": "Webhook MILA",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [260, 300]
+      "position": [260, 300],
+      "webhookId": "mila-events-webhook"
     },
     {
       "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{$json.flow}}",
-              "operation": "equals",
-              "value2": "ticket.created"
-            }
-          ]
-        }
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"flow\": $json.body.flow || $json.flow, \"received\": true } }}",
+        "options": {}
       },
-      "id": "if-created",
-      "name": "¿ticket.created?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
       "position": [520, 300]
-    },
-    {
-      "parameters": {
-        "functionCode": "const item = items[0].json;\nreturn [{ json: { channel: 'notify', title: 'Nueva solicitud MILA', body: item.number || item.ticketId, flow: item.flow } }];"
-      },
-      "id": "prep-notify",
-      "name": "Preparar notificación",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [780, 200]
-    },
-    {
-      "parameters": {
-        "functionCode": "return items.map(i => ({ json: { handled: true, flow: i.json.flow || 'other', at: new Date().toISOString() } }));"
-      },
-      "id": "log-other",
-      "name": "Log otros eventos",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [780, 420]
     }
   ],
   "connections": {
     "Webhook MILA": {
-      "main": [[{ "node": "¿ticket.created?", "type": "main", "index": 0 }]]
-    },
-    "¿ticket.created?": {
-      "main": [
-        [{ "node": "Preparar notificación", "type": "main", "index": 0 }],
-        [{ "node": "Log otros eventos", "type": "main", "index": 0 }]
-      ]
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
     }
   },
-  "active": false,
-  "settings": {},
-  "versionId": "mila-sprint5-1"
+  "settings": { "executionOrder": "v1" },
+  "active": false
 }

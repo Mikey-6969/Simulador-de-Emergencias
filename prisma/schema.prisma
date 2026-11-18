@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -136,7 +136,7 @@ model AiAnalysis {
   recommendations String     @db.Text
   suggestedPriority Priority?
   confidence      Float      @default(0.7)
-  rawResponse     String?    @db.LongText
+  rawResponse     String?    @db.Text
   decision        AiDecision @default(PENDIENTE)
   reviewerId      String?
   reviewerNotes   String?    @db.Text
@@ -204,7 +204,7 @@ model AutomationLog {
   flow      String
   success   Boolean
   payload   Json?
-  response  String?  @db.LongText
+  response  String?  @db.Text
   error     String?  @db.Text
   createdAt DateTime @default(now())
 }
