@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -5,7 +6,17 @@ export default function HomePage() {
     <main className="relative overflow-hidden">
       <div className="hero-glow" />
       <header className="mila-shell flex items-center justify-between py-6">
-        <div className="text-2xl font-semibold tracking-[0.18em]">MILA</div>
+        <div className="flex items-center gap-3">
+          <Image
+            src="/mila-logo.jpg"
+            alt="Logo MILA"
+            width={40}
+            height={40}
+            className="rounded-xl"
+            priority
+          />
+          <div className="text-2xl font-semibold tracking-[0.18em]">MILA</div>
+        </div>
         <Link href="/login" className="mila-btn mila-btn-primary">
           Ingresar
         </Link>
@@ -36,24 +47,15 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mila-panel fade-up-delay relative overflow-hidden p-6 md:p-8">
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(47,211,193,0.15), transparent 40%), radial-gradient(circle at 80% 20%, rgba(240,163,94,0.25), transparent 45%)",
-            }}
+        <div className="fade-up-delay flex items-center justify-center">
+          <Image
+            src="/mila-logo.jpg"
+            alt="Logo MILA — Mesa de ayuda inteligente"
+            width={420}
+            height={420}
+            className="h-auto w-full max-w-[420px] rounded-[2rem] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+            priority
           />
-          <div className="relative space-y-4">
-            <h2 className="text-xl font-semibold">Cómo funciona</h2>
-            <ol className="space-y-3 text-sm" style={{ color: "var(--muted)" }}>
-              <li>1. El cliente reporta el caso desde su zona.</li>
-              <li>2. El agente IA orienta el diagnóstico remoto.</li>
-              <li>3. Si no se resuelve, el especialista de la zona escala.</li>
-              <li>4. MILA recomienda técnico por sede y capacidad.</li>
-              <li>5. Se asigna, atiende y notifica con n8n.</li>
-            </ol>
-          </div>
         </div>
       </section>
     </main>
