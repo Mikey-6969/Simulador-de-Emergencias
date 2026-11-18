@@ -38,11 +38,17 @@ export default function HomePage() {
           </h1>
           <p className="mt-5 max-w-xl text-lg" style={{ color: "var(--muted)" }}>
             Diagnóstico remoto con IA, especialistas por zona y técnicos de campo en Bogotá —
-            Norte, Sur, Oriente y Occidente — con automatización n8n.
+            Norte, Sur, Oriente y Occidente.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/login" className="mila-btn mila-btn-primary">
-              Ingresar a MILA
+              Especialista
+            </Link>
+            <Link href="/login" className="mila-btn mila-btn-accent">
+              Técnico
+            </Link>
+            <Link href="/login" className="mila-btn mila-btn-ghost">
+              Cliente
             </Link>
           </div>
         </div>

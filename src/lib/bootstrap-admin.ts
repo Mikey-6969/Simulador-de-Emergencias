@@ -1,12 +1,15 @@
 import { hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ensureCatalogSeed } from "@/lib/seed-catalog";
 
 let bootstrapped = false;
 
-/** Creates a single admin when configured via env and none exists yet. */
+/** Seeds demo catalog (if configured) and optional first admin. */
 export async function ensureBootstrapAdmin() {
   if (bootstrapped) return;
   bootstrapped = true;
+
+  await ensureCatalogSeed();
 
   const email = process.env.MILA_ADMIN_EMAIL?.trim().toLowerCase();
   const password = process.env.MILA_ADMIN_PASSWORD?.trim();

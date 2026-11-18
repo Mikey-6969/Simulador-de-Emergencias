@@ -15,7 +15,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "MILA — Mesa de ayuda inteligente",
   description:
-    "Plataforma de soporte técnico con agente IA, asignación por zona y automatización n8n.",
+    "Plataforma de soporte técnico con agente IA y asignación por zona en Bogotá.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
