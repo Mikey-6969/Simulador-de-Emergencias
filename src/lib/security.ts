@@ -22,20 +22,56 @@ export function allowLoginAttempt(key: string, limit = 10, windowMs = 15 * 60 * 
   return true;
 }
 
+function normalizeHost(value: string) {
+  return value.trim().toLowerCase().replace(/:\d+$/, "");
+}
+
+function allowedHosts(req: Request) {
+  const hosts = new Set<string>();
+  const add = (raw?: string | null) => {
+    if (!raw) return;
+    for (const part of raw.split(",")) {
+      const host = normalizeHost(part);
+      if (host) hosts.add(host);
+    }
+  };
+  add(req.headers.get("host"));
+  add(req.headers.get("x-forwarded-host"));
+  add(process.env.APP_HOST);
+  add(process.env.NEXT_PUBLIC_APP_HOST);
+  return hosts;
+}
+
+function hostMatches(candidate: string, allowed: Set<string>) {
+  const host = normalizeHost(candidate);
+  if (allowed.has(host)) return true;
+  // Cursor/public app hosts may differ from the internal Host header.
+  for (const item of allowed) {
+    if (host.endsWith(".apps.grok.bot") && item.endsWith(".apps.grok.bot")) return true;
+  }
+  return false;
+}
+
 export function assertSameOrigin(req: Request) {
   if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
     return null;
   }
 
-  const host = req.headers.get("host");
-  if (!host) {
+  // Browser same-origin/same-site fetches (typical app UI -> /api/*).
+  const fetchSite = req.headers.get("sec-fetch-site");
+  if (fetchSite === "same-origin" || fetchSite === "same-site") {
+    return null;
+  }
+
+  const allowed = allowedHosts(req);
+  if (!allowed.size) {
     return NextResponse.json({ error: "Host inválido" }, { status: 403 });
   }
 
   const origin = req.headers.get("origin");
   if (origin) {
     try {
-      if (new URL(origin).host === host) return null;
+      if (hostMatches(new URL(origin).host, allowed)) return null;
     } catch {
       return NextResponse.json({ error: "Origen inválido" }, { status: 403 });
     }
@@ -45,7 +81,7 @@ export function assertSameOrigin(req: Request) {
   const referer = req.headers.get("referer");
   if (referer) {
     try {
-      if (new URL(referer).host === host) return null;
+      if (hostMatches(new URL(referer).host, allowed)) return null;
     } catch {
       return NextResponse.json({ error: "Referer inválido" }, { status: 403 });
     }
