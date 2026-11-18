@@ -1,103 +1,87 @@
-# ASMS Fanalca — mapa autenticado
+# ASMS Fanalca — mapa autenticado (Office 365)
 
-**Cuenta:** soporteticbogota2.cgs@ciudadlimpia.com.co
-**Método:** Office 365
-**Estado:** OK
-**Fecha:** 2026-11-18T18:50:47.968Z
+**Cuenta:** `soporteticbogota2.cgs@ciudadlimpia.com.co`  
+**Método:** Office 365 / tenant Kumo 2.0  
+**Estado:** OK  
+**Fecha:** 2026-11-18  
+**Especialista:** `https://mastd.fanalca.com/asmsspecialist` → `#/home/list/`  
+**Cliente (MAI Portal Cliente):** `https://mastd.fanalca.com/asmscustomer` → `#/home`
 
-## Especialista
+---
 
-Controles: .st0Points{fill:#FFFFFF;} | Crear caso | Acerca de | Enviar comentario
+## Consola especialista (Portal del Especialista)
 
-```
-Crear caso
-```
+### Menú
+- **Casos**
+  - Asignados a mi
+  - De mis grupos
+  - De mis proyectos
+  - Mi calendario (FSC) → `#/home/FSC`
+  - Mis aprobaciones
+  - Aprobaciones pendientes
+- **Tareas**
+- **Base de Conocimiento** → `#/home/kb/`
+- Accesos directos: Casos abiertos, Vistas personalizadas, Casos favoritos, Filtros personalizados
+- Acción superior: **Crear caso**
 
-## Cliente
-URL: https://mastd.fanalca.com/asmscustomer/index.html#/home
+### Listado / bandeja
+Acciones: REASIGNAR · EXPORTAR · OPCIONES DE COLUMNA
 
-Controles: .st0Points{fill:#FFFFFF;} | .st0ASMS{fill:#F4836F;}
-ASMS  Usuarios | Registrar caso | NovedadesEncuestas Pendientes0 Casos cerrados sin responder encuestaVer encuestasAprobaciones pendientes0 Casos pendientes de aprobaciónVer CasosNoticias | Ver encuestas | Ver Casos | Update
+Columnas observadas: Caso, Tarea, Tipo de caso, Proyecto, Estado, Fecha de registro, Asunto, Razón, Cliente, Compañía, CI, Responsable, Grupo responsable, Tipo de registro, Progreso, Tiempo, Servicio, SLA, Receptor, Autor, Jerarquía, Categoría, Fecha de atención estimada/real, Fecha de cierre, Impacto, Prioridad, Urgencia, Proveedor, Unidad organizacional, OLA, Riesgo, UC, Serial, Costo, Precio, Fecha de modificación, Etiqueta de inventario, Es importado, Esfuerzo, Modelo, Solicitante, Fechas inicio/final (plan y real).
 
-```
-Registrar caso
-Transformamos la experiencia del servicio - Plataforma digital integrada para una gestión más inteligente - Acceso 24/7 desde cualquier lugar - Transparencia, trazabilidad y evolución continua - Esto es solo el comienzo
+### Caso ejemplo visto
+- ID `CL: 854` · Grupo Ciudad Limpia · Estado **Registrado** · Tipo **Incidentes**
+- Asunto: Inconveniente al descargar copia de seguridad de Linix
+- Servicio/categoría: Redes · Prioridad/Impacto/Urgencia: Bajo
+- Progreso ~52% · tiempos SLA visibles · responsables/grupo asignados
 
-| |
-Artículos
+### Formulario Crear caso (`#/home/newcase/`)
+1. Atención al cliente: Proyecto (*), Tipo (*) — ej. proyecto “Grupo Ciudad Limpia”
+2. Categorización: Servicio (*), Categoría (*)
+3. Cliente: Solicitante, Cliente, Compañía, CI, SLA
+4. Básica: Estado, Razón, Grupo responsable, Responsable, Tipo de registro
+5. Detalles: Asunto (0/256) + Buscar, Descripción (editor enriquecido), Adjuntos
+6. Prioridad: Impacto, Urgencia, Prioridad, Proveedor, Unidad organizacional
+7. Botones: Ir al Listado · Cancelar · Guardar
 
-Consulte artículos que le pueden ayudar a resolver su caso.
+---
 
-Servicios
+## Consola cliente (MAI Portal Cliente)
 
-Consulte servicios y registre su caso en breve daremos una respuesta.
+### Home
+- Buscador de estado de caso (número o asunto)
+- Botón **+ Registrar caso**
+- Tiles: **Artículos** · **Servicios** · **Mis casos**
+- Noticias + artículos de KB (antivirus, correo sospechoso, terceros, etc.)
+- Accesos: Talento en Línea / SuccessFactors, Intranet Ciudad Limpia
+- Panel Novedades: encuestas pendientes, aprobaciones pendientes
+- Chat / soporte en sidebar
 
-Mis casos
+### Wizard Registrar caso (`#/home/wizard`)
+Pasos: **Proyecto → Servicio → Categoría → Caso**
 
-Haga un seguimiento de los casos registrados.
+Proyectos visibles:
+- **FN Tecnología** — mesa corporativa de incidentes/solicitudes tecnológicas
+- **Grupo Ciudad Limpia** — mesa TI para herramientas, equipos y aplicaciones de operación
 
-Noticias
-del sector que te pueden interesar
-3
-MAR
-2026
-!
-Bienvenido a tu nueva experiencia digital.
+---
 
-¡Gracias por acompañarnos en este nuevo paso!
+## Adaptación a MILA
 
-Artículos
-para resolver tu caso
-16
-MAR
-2026
-¿Cuáles son los requisitos para crear un tercero en el sistema?
+| ASMS | MILA |
+|------|------|
+| Portal Cliente / Portal Especialista | `/cliente` · `/especialista` |
+| Proyecto + servicio + categoría | Servicio + zona Bogotá |
+| Bandeja asignados / grupos | Inbox por rol + asignación |
+| Estados, impacto, urgencia, prioridad, SLA | Estados MILA + prioridad IA |
+| Reasignar / responsable / grupo | Escalamiento + técnicos por zona |
+| KB / artículos | Diagnóstico remoto con agente IA |
+| Adjuntos + trazabilidad | Timeline + evidencias |
+| Encuestas / aprobaciones / FSC | Backlog posterior a Sprint 5 |
 
-Permite identificar la información necesaria para registrar un nuevo tercero en el sistema
+---
 
-16
-MAR
-2026
-¿Cómo realizar la consulta en Inspektor?
-
-Permite guiar al usuario en el uso de Inspektor, explicando los pasos necesarios para realizar una consulta
-
-16
-MAR
-2026
-¿Cómo realizar la búsqueda del código postal?
-
-Permite orientar al usuario en los pasos necesarios para consultar el código postal de una dirección específica
-
-16
-MAR
-2026
-¿Cuáles son los requisitos para crear un tercero Proveedor de caja menor y/o gastos de viaje en el sistema?
-
-Permite definir y comunicar los documentos y datos necesarios para registrar un tercero como proveedor de caja menor y/o gastos de viaje en el sistema
-
-Otros
-Accesos
-Acceso directo a Talento en Línea - SuccessFactors
-
-Plataforma de Gestión Humana donde podrás consultar y gestionar información relacionada con tu perfil laboral, vacaciones, evaluaciones y procesos internos de talento.
-
-Acceso Directo a Intranet Ciudad Limpia
-
-Acceso rápido a la Intranet de Ciudad Limpia
-
-Novedades
-Encuestas Pendientes
-0
-Casos cerrados sin responder encuesta
-Ver encuestas
-Aprobaciones pendientes
-0
-Casos pendientes de aprobación
-Ver Casos
-Noticias
-Novedades
-Powered by Aranda Software
-There is a new version available
-Update
-```
+## Screenshots
+- `asms-spec-home.png` / `asms-spec-crear-caso.png` / `asms-spec-home-final.png`
+- `asms-customer-home.png` / `asms-customer-Registrar_caso.png`
+- En `/opt/cursor/artifacts/`
