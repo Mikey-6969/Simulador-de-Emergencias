@@ -30,29 +30,43 @@ export default function LoginPage() {
   return (
     <main className="mila-shell grid min-h-screen place-items-center py-10">
       <form onSubmit={onSubmit} className="mila-panel w-full max-w-md space-y-4 p-8 fade-up">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: "var(--brand)" }}>
-            MILA
-          </p>
-          <h1 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-            Ingresar
-          </h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
-            Ingresa con tu cuenta. Clientes nuevos pueden registrarse.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em]" style={{ color: "var(--brand)" }}>
+              MILA
+            </p>
+            <h1 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
+              Ingresar
+            </h1>
+            <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+              Acceso con las cuentas provisionadas por zona.
+            </p>
+          </div>
+          <Link href="/" className="mila-btn mila-btn-ghost shrink-0">
+            ← Inicio
+          </Link>
         </div>
 
         <label className="block space-y-1 text-sm">
           <span>Correo</span>
-          <input className="mila-input" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            className="mila-input"
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </label>
         <label className="block space-y-1 text-sm">
           <span>Contraseña</span>
           <input
             type="password"
             className="mila-input"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </label>
 
@@ -62,9 +76,9 @@ export default function LoginPage() {
           {loading ? "Validando…" : "Entrar"}
         </button>
 
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          ¿Nuevo? <Link href="/registro">Crear cuenta de cliente</Link>
-        </p>
+        <Link href="/" className="mila-btn mila-btn-ghost w-full text-center">
+          Volver a la pantalla principal
+        </Link>
       </form>
     </main>
   );

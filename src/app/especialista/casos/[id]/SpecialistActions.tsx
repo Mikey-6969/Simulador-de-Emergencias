@@ -68,7 +68,7 @@ export function SpecialistActions({
 
   return (
     <div className="mila-panel space-y-4 p-6">
-      <h3 className="font-semibold">Acciones Sprint 5</h3>
+      <h3 className="font-semibold">Acciones del caso</h3>
 
       {canManage ? (
         <>
