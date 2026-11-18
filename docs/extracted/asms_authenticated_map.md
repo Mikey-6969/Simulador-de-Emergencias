@@ -1,41 +1,103 @@
 # ASMS Fanalca — mapa autenticado
 
-**Fecha:** 2026-11-18  
-**Cuenta intentada:** `soporteticbogota2.cgs@ciudadlimpia.com.co`  
-**Método:** Office 365 (botón inferior), tenant branding **Kumo 2.0** / ciudadlimpia
+**Cuenta:** soporteticbogota2.cgs@ciudadlimpia.com.co
+**Método:** Office 365
+**Estado:** OK
+**Fecha:** 2026-11-18T18:50:47.968Z
 
-## Resultado
+## Especialista
 
-**Login fallido antes de MFA.**
+Controles: .st0Points{fill:#FFFFFF;} | Crear caso | Acerca de | Enviar comentario
 
-Microsoft muestra:
+```
+Crear caso
+```
 
-> Your account or password is incorrect. If you don't remember your password, reset it now.
+## Cliente
+URL: https://mastd.fanalca.com/asmscustomer/index.html#/home
 
-- El correo es reconocido (pasa a pantalla de password del tenant Kumo 2.0).
-- La contraseña enviada se tipeó completa (17 caracteres) y fue rechazada.
-- **No apareció el doble factor** porque la autenticación no llegó a esa etapa.
+Controles: .st0Points{fill:#FFFFFF;} | .st0ASMS{fill:#F4836F;}
+ASMS  Usuarios | Registrar caso | NovedadesEncuestas Pendientes0 Casos cerrados sin responder encuestaVer encuestasAprobaciones pendientes0 Casos pendientes de aprobaciónVer CasosNoticias | Ver encuestas | Ver Casos | Update
 
-Capturas:
+```
+Registrar caso
+Transformamos la experiencia del servicio - Plataforma digital integrada para una gestión más inteligente - Acceso 24/7 desde cualquier lugar - Transparencia, trazabilidad y evolución continua - Esto es solo el comienzo
 
-- `/opt/cursor/artifacts/asms-o365b-2-email.png`
-- `/opt/cursor/artifacts/asms-o365b-5-after-submit.png`
-- `/opt/cursor/artifacts/asms-o365-error.png`
+| |
+Artículos
 
-## Intentos previos
+Consulte artículos que le pueden ayudar a resolver su caso.
 
-- ARANDA local: `Authentication failed, verify the data`
-- Office 365 (intento anterior): mismo error de password
+Servicios
 
-## Pendiente para mapear (requiere login OK)
+Consulte servicios y registre su caso en breve daremos una respuesta.
 
-### Especialista
-- Menú / bandeja / columnas / filtros / estados
-- Detalle de caso (pestañas, historial, adjuntos, asignación, SLA)
+Mis casos
 
-### Cliente
-- Home / crear caso / mis solicitudes / base de conocimiento
+Haga un seguimiento de los casos registrados.
 
-## Acción requerida
+Noticias
+del sector que te pueden interesar
+3
+MAR
+2026
+!
+Bienvenido a tu nueva experiencia digital.
 
-Confirmar o enviar **contraseña correcta** de Office 365 para esa cuenta (o reset). Cuando Microsoft acepte la clave, aparecerá MFA y se podrá completar el mapeo.
+¡Gracias por acompañarnos en este nuevo paso!
+
+Artículos
+para resolver tu caso
+16
+MAR
+2026
+¿Cuáles son los requisitos para crear un tercero en el sistema?
+
+Permite identificar la información necesaria para registrar un nuevo tercero en el sistema
+
+16
+MAR
+2026
+¿Cómo realizar la consulta en Inspektor?
+
+Permite guiar al usuario en el uso de Inspektor, explicando los pasos necesarios para realizar una consulta
+
+16
+MAR
+2026
+¿Cómo realizar la búsqueda del código postal?
+
+Permite orientar al usuario en los pasos necesarios para consultar el código postal de una dirección específica
+
+16
+MAR
+2026
+¿Cuáles son los requisitos para crear un tercero Proveedor de caja menor y/o gastos de viaje en el sistema?
+
+Permite definir y comunicar los documentos y datos necesarios para registrar un tercero como proveedor de caja menor y/o gastos de viaje en el sistema
+
+Otros
+Accesos
+Acceso directo a Talento en Línea - SuccessFactors
+
+Plataforma de Gestión Humana donde podrás consultar y gestionar información relacionada con tu perfil laboral, vacaciones, evaluaciones y procesos internos de talento.
+
+Acceso Directo a Intranet Ciudad Limpia
+
+Acceso rápido a la Intranet de Ciudad Limpia
+
+Novedades
+Encuestas Pendientes
+0
+Casos cerrados sin responder encuesta
+Ver encuestas
+Aprobaciones pendientes
+0
+Casos pendientes de aprobación
+Ver Casos
+Noticias
+Novedades
+Powered by Aranda Software
+There is a new version available
+Update
+```
