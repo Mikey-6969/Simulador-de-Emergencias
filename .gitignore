@@ -42,3 +42,7 @@ next-env.d.ts
 # uploads
 /uploads
 /public/uploads
+
+# local credentials (never publish)
+CREDENCIALES*.txt
+docs/CREDENCIALES_LOCAL*
