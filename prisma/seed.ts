@@ -34,25 +34,35 @@ async function upsertUser(data: {
 }
 
 async function main() {
+  if (process.env.MILA_SEED_DEMO !== "1") {
+    console.log("Seed omitido: define MILA_SEED_DEMO=1 para cargar cuentas de desarrollo.");
+    return;
+  }
+
+  const password = process.env.MILA_DEMO_PASSWORD?.trim();
+  if (!password) {
+    throw new Error("MILA_DEMO_PASSWORD is required when MILA_SEED_DEMO=1");
+  }
+
   const admin = await upsertUser({
     email: "admin@mila.app",
     name: "Ana Admin",
     role: "ADMIN",
-    password: "Mila123*",
+    password,
   });
 
   const coordinator = await upsertUser({
     email: "coord@mila.app",
     name: "Carlos Coordinador",
     role: "COORDINADOR",
-    password: "Mila123*",
+    password,
   });
 
   const cliente = await upsertUser({
     email: "cliente@mila.app",
     name: "Clara Cliente",
     role: "CLIENTE",
-    password: "Mila123*",
+    password,
     zone: "NORTE",
     phone: "3001112233",
   });
@@ -86,7 +96,7 @@ async function main() {
       email: t.email,
       name: t.name,
       role: "TECNICO",
-      password: "Mila123*",
+      password,
       zone: t.zone,
     });
     await prisma.technicianProfile.upsert({
@@ -112,7 +122,6 @@ async function main() {
     admin: admin.email,
     coordinator: coordinator.email,
     cliente: cliente.email,
-    password: "Mila123*",
   });
 }
 

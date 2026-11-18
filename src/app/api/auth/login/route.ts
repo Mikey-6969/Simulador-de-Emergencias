@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { homeForRole, loginWithCredentials } from "@/lib/auth";
+import { ensureBootstrapAdmin } from "@/lib/bootstrap-admin";
 
 const schema = z.object({
   email: z.string().email(),
@@ -8,6 +9,8 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  await ensureBootstrapAdmin();
+
   const body = await req.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

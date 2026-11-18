@@ -25,12 +25,10 @@ npm run dev
 
 Abre [http://localhost:3000](http://localhost:3000).
 
-### Cuentas demo
+### Cuentas demo (solo local)
 
-- `cliente@mila.app` / `Mila123*`
-- `coord@mila.app` / `Mila123*`
-- `tecnico.norte@mila.app` / `Mila123*`
-- `admin@mila.app` / `Mila123*`
+Con `MILA_SEED_DEMO=1` y `MILA_DEMO_PASSWORD` en `.env`, luego `npm run db:seed`.
+Técnicos/coordinadores no se auto-registran: los crea un admin/coordinador.
 
 ## Documentación
 

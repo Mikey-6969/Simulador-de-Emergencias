@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { TicketStatus } from "@prisma/client";
 import { getSession } from "@/lib/auth";
-import { changeTicketStatus } from "@/lib/tickets";
+import { prisma } from "@/lib/db";
+import { canAccessTicket, changeTicketStatus } from "@/lib/tickets";
 
 const schema = z.object({
   status: z.enum([
@@ -29,6 +30,15 @@ export async function POST(req: Request, ctx: Ctx) {
   }
 
   const { id } = await ctx.params;
+  const existing = await prisma.ticket.findUnique({
+    where: { id },
+    select: { id: true, customerId: true, assigneeId: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Caso no encontrado" }, { status: 404 });
+  if (!canAccessTicket(session.role, session.id, existing)) {
+    return NextResponse.json({ error: "Sin permiso sobre este caso" }, { status: 403 });
+  }
+
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
 

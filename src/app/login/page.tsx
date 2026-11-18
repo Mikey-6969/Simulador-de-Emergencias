@@ -4,8 +4,8 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("coord@mila.app");
-  const [password, setPassword] = useState("Mila123*");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,7 @@ export default function LoginPage() {
             Ingresar
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
-            Usa las cuentas demo o tu registro.
+            Ingresa con tu cuenta. Clientes nuevos pueden registrarse.
           </p>
         </div>
 
@@ -63,11 +63,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-sm" style={{ color: "var(--muted)" }}>
-          ¿Nuevo? <Link href="/registro">Crear cuenta</Link>
-        </p>
-        <p className="text-xs" style={{ color: "var(--muted)" }}>
-          Demo: cliente@mila.app · coord@mila.app · tecnico.norte@mila.app · admin@mila.app /
-          Mila123*
+          ¿Nuevo? <Link href="/registro">Crear cuenta de cliente</Link>
         </p>
       </form>
     </main>

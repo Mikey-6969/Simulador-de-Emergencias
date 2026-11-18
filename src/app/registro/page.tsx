@@ -8,7 +8,6 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
-    role: "CLIENTE",
     zone: "NORTE",
   });
   const [error, setError] = useState("");
@@ -38,6 +37,10 @@ export default function RegisterPage() {
         <h1 className="text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
           Crear cuenta MILA
         </h1>
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          El registro público crea cuentas de cliente. Técnicos y coordinadores los registra un
+          administrador.
+        </p>
         <label className="block space-y-1 text-sm">
           <span>Nombre</span>
           <input
@@ -67,33 +70,19 @@ export default function RegisterPage() {
             required
           />
         </label>
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="block space-y-1 text-sm">
-            <span>Rol</span>
-            <select
-              className="mila-select"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            >
-              <option value="CLIENTE">Cliente</option>
-              <option value="TECNICO">Técnico</option>
-              <option value="COORDINADOR">Coordinador</option>
-            </select>
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span>Zona</span>
-            <select
-              className="mila-select"
-              value={form.zone}
-              onChange={(e) => setForm({ ...form, zone: e.target.value })}
-            >
-              <option value="NORTE">Norte</option>
-              <option value="SUR">Sur</option>
-              <option value="ORIENTE">Oriente</option>
-              <option value="OCCIDENTE">Occidente</option>
-            </select>
-          </label>
-        </div>
+        <label className="block space-y-1 text-sm">
+          <span>Zona</span>
+          <select
+            className="mila-select"
+            value={form.zone}
+            onChange={(e) => setForm({ ...form, zone: e.target.value })}
+          >
+            <option value="NORTE">Norte</option>
+            <option value="SUR">Sur</option>
+            <option value="ORIENTE">Oriente</option>
+            <option value="OCCIDENTE">Occidente</option>
+          </select>
+        </label>
         {error ? <p className="text-sm text-[#ffb4b4]">{error}</p> : null}
         <button className="mila-btn mila-btn-primary w-full" disabled={loading}>
           {loading ? "Creando…" : "Registrarme"}

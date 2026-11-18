@@ -8,7 +8,7 @@ export function NewTechnicianForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "Mila123*",
+    password: "",
     zones: ["NORTE"],
     skills: "general, redes",
     capacityPerDay: 4,
@@ -64,6 +64,9 @@ export function NewTechnicianForm() {
       <input
         className="mila-input"
         placeholder="Contraseña temporal"
+        type="password"
+        required
+        minLength={6}
         value={form.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />

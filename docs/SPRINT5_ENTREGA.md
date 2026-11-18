@@ -20,23 +20,23 @@ Base incluida (sprints previos necesarios para demo):
 - Webhooks n8n (`N8N_WEBHOOK_URL`) + `AutomationLog`
 - PostgreSQL con Prisma en runtime + DDL MySQL académico en `docs/sql/mila.sql`
 
-## Cuentas demo
+## Cuentas demo (solo entorno local)
 
-| Correo | Rol | Password |
-|--------|-----|----------|
-| cliente@mila.app | Cliente | Mila123* |
-| coord@mila.app | Coordinador | Mila123* |
-| tecnico.norte@mila.app | Técnico | Mila123* |
-| admin@mila.app | Admin | Mila123* |
+Activa `MILA_SEED_DEMO=1` y define `MILA_DEMO_PASSWORD` en `.env` (no se publica).
+Luego `npm run db:seed`. Correos de ejemplo: `cliente@mila.app`, `coord@mila.app`,
+`tecnico.norte@mila.app`, `admin@mila.app`.
+
+En producción: registra clientes por UI; crea técnicos desde coordinador; admin inicial con
+`MILA_ADMIN_EMAIL` / `MILA_ADMIN_PASSWORD`.
 
 ## Cómo correr
 
 ```bash
 cp .env.example .env
-# configurar DATABASE_URL PostgreSQL
+# configurar DATABASE_URL PostgreSQL y AUTH_SECRET
 npm install
 npx prisma db push
-npm run db:seed
+MILA_SEED_DEMO=1 MILA_DEMO_PASSWORD=... npm run db:seed
 npm run dev
 ```
 
