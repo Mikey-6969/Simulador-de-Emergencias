@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createTicket } from "@/lib/tickets";
+import { assertSameOrigin } from "@/lib/security";
 
 const createSchema = z.object({
   title: z.string().min(5),
@@ -48,6 +49,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   if (session.role !== "CLIENTE" && session.role !== "ADMIN" && session.role !== "COORDINADOR") {

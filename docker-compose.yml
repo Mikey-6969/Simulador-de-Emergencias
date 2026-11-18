@@ -3,9 +3,9 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_DB: mila
-      POSTGRES_USER: mila
-      POSTGRES_PASSWORD: mila_dev_pass
+      POSTGRES_DB: ${POSTGRES_DB:-mila}
+      POSTGRES_USER: ${POSTGRES_USER:-mila}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
       N8N_PROTOCOL: http
       WEBHOOK_URL: http://localhost:5678/
       GENERIC_TIMEZONE: America/Bogota
-      N8N_ENCRYPTION_KEY: mila-dev-encryption-key-32chars
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Set N8N_ENCRYPTION_KEY in your environment}
     volumes:
       - mila_n8n:/home/node/.n8n
 

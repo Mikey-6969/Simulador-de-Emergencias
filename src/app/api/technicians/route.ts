@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { assertSameOrigin } from "@/lib/security";
 
 export async function GET() {
   const session = await getSession();
@@ -27,6 +28,9 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   if (!["COORDINADOR", "ADMIN"].includes(session.role)) {

@@ -61,13 +61,17 @@ export default async function ClienteCasoPage({ params }: Props) {
                 {ticket.attachments.map((file) => (
                   <a
                     key={file.id}
-                    href={file.fileUrl}
+                    href={`/api/attachments/${file.id}`}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="block overflow-hidden rounded-xl border border-[var(--line)]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={file.fileUrl} alt={file.fileName} className="h-24 w-24 object-cover" />
+                    <img
+                      src={`/api/attachments/${file.id}`}
+                      alt={file.fileName}
+                      className="h-24 w-24 object-cover"
+                    />
                   </a>
                 ))}
               </div>

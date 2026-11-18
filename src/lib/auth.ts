@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
@@ -9,16 +8,10 @@ const COOKIE = "mila_session";
 
 function secret() {
   const value = process.env.AUTH_SECRET?.trim();
-  if (value) return new TextEncoder().encode(value);
-
-  // Hosted apps always get DATABASE_URL; derive a stable signing key when AUTH_SECRET is unset.
-  const databaseUrl = process.env.DATABASE_URL?.trim();
-  if (databaseUrl) {
-    const derived = createHash("sha256").update(`mila-session:${databaseUrl}`).digest("hex");
-    return new TextEncoder().encode(derived);
+  if (!value || value.length < 16) {
+    throw new Error("AUTH_SECRET is required");
   }
-
-  throw new Error("AUTH_SECRET is required");
+  return new TextEncoder().encode(value);
 }
 
 export type SessionUser = {
@@ -71,12 +64,18 @@ export async function getSession(): Promise<SessionUser | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret());
+    const id = String(payload.id);
+    const dbUser = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, name: true, role: true, zone: true, active: true },
+    });
+    if (!dbUser || !dbUser.active) return null;
     return {
-      id: String(payload.id),
-      email: String(payload.email),
-      name: String(payload.name),
-      role: payload.role as Role,
-      zone: (payload.zone as string | null) ?? null,
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role,
+      zone: dbUser.zone,
     };
   } catch {
     return null;

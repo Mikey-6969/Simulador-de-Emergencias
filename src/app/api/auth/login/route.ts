@@ -2,13 +2,25 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { homeForRole, loginWithCredentials } from "@/lib/auth";
 import { ensureBootstrapAdmin } from "@/lib/bootstrap-admin";
+import { allowLoginAttempt, assertSameOrigin, clientIp } from "@/lib/security";
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(4),
+  password: z.string().min(6),
 });
 
 export async function POST(req: Request) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
+  const ip = clientIp(req);
+  if (!allowLoginAttempt(`login:${ip}`)) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo." },
+      { status: 429 },
+    );
+  }
+
   try {
     await ensureBootstrapAdmin();
 
@@ -27,7 +39,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("login failed", error);
     return NextResponse.json(
-      { error: "No se pudo iniciar sesión. Reintenta en unos segundos." },
+      { error: "No se pudo iniciar sesión. Revisa la configuración del servidor." },
       { status: 500 },
     );
   }

@@ -3,11 +3,15 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canAccessTicket, escalateTicket } from "@/lib/tickets";
+import { assertSameOrigin } from "@/lib/security";
 
 const schema = z.object({ reason: z.string().min(8) });
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function POST(req: Request, ctx: Ctx) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   if (!["COORDINADOR", "ADMIN", "CLIENTE"].includes(session.role)) {

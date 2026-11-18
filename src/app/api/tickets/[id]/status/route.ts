@@ -4,6 +4,7 @@ import { TicketStatus } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canAccessTicket, changeTicketStatus } from "@/lib/tickets";
+import { assertSameOrigin } from "@/lib/security";
 
 const schema = z.object({
   status: z.enum([
@@ -23,6 +24,9 @@ const schema = z.object({
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function POST(req: Request, ctx: Ctx) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   if (!["COORDINADOR", "ADMIN", "TECNICO"].includes(session.role)) {

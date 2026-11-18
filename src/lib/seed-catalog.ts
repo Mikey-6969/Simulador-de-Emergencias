@@ -11,10 +11,6 @@ const zoneSlug: Record<Zone, string> = {
   OCCIDENTE: "occidente",
 };
 
-/** bcrypt hash for the local/demo catalog password (plaintext is not stored in source). */
-const CATALOG_PASSWORD_HASH =
-  "$2b$10$dtiZkbFWstSHaB4YtcJpEOKmt/ui6ao7..B62Jwktj2C3/qNCNzx2";
-
 async function upsertUser(data: {
   email: string;
   name: string;
@@ -44,32 +40,16 @@ async function upsertUser(data: {
   });
 }
 
-let seeding: Promise<void> | null = null;
-
 /**
- * Ensures the zone catalog exists.
- * - If MILA_DEMO_PASSWORD is set, upserts with that password.
- * - Otherwise, if the database has no users, seeds once with the bundled catalog hash.
+ * Local/CLI-only catalog seed.
+ * Requires MILA_DEMO_PASSWORD. Never runs automatically on login/public boot.
  */
-export async function ensureCatalogSeed() {
-  if (!seeding) {
-    seeding = runSeed().finally(() => {
-      seeding = null;
-    });
-  }
-  await seeding;
-}
-
-async function runSeed() {
+export async function seedDemoCatalog() {
   const password = process.env.MILA_DEMO_PASSWORD?.trim();
-  if (password) {
-    await seedCatalog(await hashPassword(password));
-    return;
+  if (!password) {
+    throw new Error("MILA_DEMO_PASSWORD is required for demo seed");
   }
-
-  const count = await prisma.user.count();
-  if (count > 0) return;
-  await seedCatalog(CATALOG_PASSWORD_HASH);
+  await seedCatalog(await hashPassword(password));
 }
 
 async function seedCatalog(passwordHash: string) {

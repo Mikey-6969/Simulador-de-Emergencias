@@ -1,11 +1,7 @@
-import { ensureCatalogSeed } from "../src/lib/seed-catalog";
+import { seedDemoCatalog } from "../src/lib/seed-catalog";
 
 async function main() {
-  if (!process.env.MILA_DEMO_PASSWORD?.trim()) {
-    console.log("Seed omitido: define MILA_DEMO_PASSWORD para cargar el catálogo.");
-    return;
-  }
-  await ensureCatalogSeed();
+  await seedDemoCatalog();
   console.log("Seed MILA OK");
 }
 

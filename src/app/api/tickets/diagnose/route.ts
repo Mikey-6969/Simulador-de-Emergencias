@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { analyzeTicket } from "@/lib/ai";
+import { assertSameOrigin } from "@/lib/security";
 
 const schema = z.object({
   title: z.string().min(5),
@@ -18,6 +19,9 @@ function toSteps(recommendations: string): string[] {
 }
 
 export async function POST(req: Request) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   if (!["CLIENTE", "ADMIN", "COORDINADOR"].includes(session.role)) {
