@@ -11,21 +11,24 @@ const zoneSlug: Record<Zone, string> = {
   OCCIDENTE: "occidente",
 };
 
+/** bcrypt hash for the local/demo catalog password (plaintext is not stored in source). */
+const CATALOG_PASSWORD_HASH =
+  "$2b$10$dtiZkbFWstSHaB4YtcJpEOKmt/ui6ao7..B62Jwktj2C3/qNCNzx2";
+
 async function upsertUser(data: {
   email: string;
   name: string;
   role: Role;
-  password: string;
+  passwordHash: string;
   zone?: Zone;
   phone?: string;
 }) {
-  const passwordHash = await hashPassword(data.password);
   return prisma.user.upsert({
     where: { email: data.email },
     update: {
       name: data.name,
       role: data.role,
-      passwordHash,
+      passwordHash: data.passwordHash,
       zone: data.zone,
       phone: data.phone,
       active: true,
@@ -34,7 +37,7 @@ async function upsertUser(data: {
       email: data.email,
       name: data.name,
       role: data.role,
-      passwordHash,
+      passwordHash: data.passwordHash,
       zone: data.zone,
       phone: data.phone,
     },
@@ -43,25 +46,38 @@ async function upsertUser(data: {
 
 let seeding: Promise<void> | null = null;
 
-/** Upserts the demo catalog when MILA_DEMO_PASSWORD is configured. */
+/**
+ * Ensures the zone catalog exists.
+ * - If MILA_DEMO_PASSWORD is set, upserts with that password.
+ * - Otherwise, if the database has no users, seeds once with the bundled catalog hash.
+ */
 export async function ensureCatalogSeed() {
-  const password = process.env.MILA_DEMO_PASSWORD?.trim();
-  if (!password) return;
-
   if (!seeding) {
-    seeding = seedCatalog(password).finally(() => {
+    seeding = runSeed().finally(() => {
       seeding = null;
     });
   }
   await seeding;
 }
 
-async function seedCatalog(password: string) {
+async function runSeed() {
+  const password = process.env.MILA_DEMO_PASSWORD?.trim();
+  if (password) {
+    await seedCatalog(await hashPassword(password));
+    return;
+  }
+
+  const count = await prisma.user.count();
+  if (count > 0) return;
+  await seedCatalog(CATALOG_PASSWORD_HASH);
+}
+
+async function seedCatalog(passwordHash: string) {
   await upsertUser({
     email: "admin@mila.app",
     name: "Ana Admin",
     role: "ADMIN",
-    password,
+    passwordHash,
   });
 
   const especialistas = [
@@ -76,7 +92,7 @@ async function seedCatalog(password: string) {
       email: e.email,
       name: e.name,
       role: "COORDINADOR",
-      password,
+      passwordHash,
       zone: e.zone,
     });
   }
@@ -102,7 +118,7 @@ async function seedCatalog(password: string) {
       email: t.email,
       name: t.name,
       role: "TECNICO",
-      password,
+      passwordHash,
       zone: t.zone,
     });
     await prisma.technicianProfile.upsert({
@@ -131,7 +147,7 @@ async function seedCatalog(password: string) {
         email: `cliente.${slug}.${n}@mila.app`,
         name: `Cliente ${zone} ${n}`,
         role: "CLIENTE",
-        password,
+        passwordHash,
         zone,
         phone: `300${ZONES.indexOf(zone)}${String(1000000 + i).slice(1)}`.slice(0, 10),
       });

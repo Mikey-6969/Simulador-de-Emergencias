@@ -9,24 +9,26 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  await ensureBootstrapAdmin();
+  try {
+    await ensureBootstrapAdmin();
 
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
-  }
+    const body = await req.json();
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    }
 
-  const user = await loginWithCredentials(
-    parsed.data.email,
-    parsed.data.password,
-  );
-  if (!user) {
+    const user = await loginWithCredentials(parsed.data.email, parsed.data.password);
+    if (!user) {
+      return NextResponse.json({ error: "Credenciales incorrectas" }, { status: 401 });
+    }
+
+    return NextResponse.json({ user, redirectTo: homeForRole(user.role) });
+  } catch (error) {
+    console.error("login failed", error);
     return NextResponse.json(
-      { error: "Credenciales incorrectas" },
-      { status: 401 },
+      { error: "No se pudo iniciar sesión. Reintenta en unos segundos." },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json({ user, redirectTo: homeForRole(user.role) });
 }

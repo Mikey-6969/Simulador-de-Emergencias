@@ -59,8 +59,24 @@ export async function POST(req: Request) {
       capacityPerDay: parsed.data.capacityPerDay,
       available: true,
     },
-    include: { user: true },
   });
 
-  return NextResponse.json({ technician: profile }, { status: 201 });
+  return NextResponse.json(
+    {
+      technician: {
+        id: profile.id,
+        zones: profile.zones,
+        skills: profile.skills,
+        capacityPerDay: profile.capacityPerDay,
+        available: profile.available,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          zone: user.zone,
+        },
+      },
+    },
+    { status: 201 },
+  );
 }

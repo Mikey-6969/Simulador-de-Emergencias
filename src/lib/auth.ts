@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
@@ -8,10 +9,16 @@ const COOKIE = "mila_session";
 
 function secret() {
   const value = process.env.AUTH_SECRET?.trim();
-  if (!value) {
-    throw new Error("AUTH_SECRET is required");
+  if (value) return new TextEncoder().encode(value);
+
+  // Hosted apps always get DATABASE_URL; derive a stable signing key when AUTH_SECRET is unset.
+  const databaseUrl = process.env.DATABASE_URL?.trim();
+  if (databaseUrl) {
+    const derived = createHash("sha256").update(`mila-session:${databaseUrl}`).digest("hex");
+    return new TextEncoder().encode(derived);
   }
-  return new TextEncoder().encode(value);
+
+  throw new Error("AUTH_SECRET is required");
 }
 
 export type SessionUser = {
