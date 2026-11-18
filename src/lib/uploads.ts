@@ -22,7 +22,8 @@ export async function saveTicketImages(
     const buffer = Buffer.from(match[2], "base64");
     if (!buffer.length || buffer.length > MAX_BYTES) continue;
 
-    const safeBase = image.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "evidencia";
+    const raw = image.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "evidencia";
+    const safeBase = raw.replace(/\.[a-zA-Z0-9]+$/, "") || "evidencia";
     const fileName = `${ticketId}-${Date.now()}-${safeBase}.${ext}`;
     const diskPath = path.join(dir, fileName);
     await writeFile(diskPath, buffer);
