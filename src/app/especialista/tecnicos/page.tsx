@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppShell } from "@/components/AppShell";
 import { NewTechnicianForm } from "./NewTechnicianForm";
 
 export default async function TecnicosPage() {
@@ -16,19 +16,26 @@ export default async function TecnicosPage() {
   });
 
   return (
-    <main className="mila-shell py-8">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/especialista" className="text-sm" style={{ color: "var(--muted)" }}>
-            ← Bandeja
-          </Link>
-          <h1 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-            Técnicos y zonas
-          </h1>
-        </div>
-        <LogoutButton />
-      </header>
-
+    <AppShell
+      brand="Portal Especialista"
+      subtitle="Técnicos y zonas"
+      userName={session.name}
+      nav={[
+        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
+        { href: "/especialista?vista=mios", label: "Asignados a mí" },
+        { href: "/especialista/nuevo", label: "Crear caso" },
+        { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
+        { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
+      ]}
+      actions={
+        <Link href="/especialista" className="mila-btn mila-btn-ghost">
+          Bandeja
+        </Link>
+      }
+    >
+      <h1 className="mb-6 text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
+        Técnicos y sedes
+      </h1>
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="mila-panel p-6">
           <h2 className="mb-4 text-xl font-semibold">Registrar técnico</h2>
@@ -43,21 +50,16 @@ export default async function TecnicosPage() {
                 <div className="text-sm" style={{ color: "var(--muted)" }}>
                   {t.user.email}
                 </div>
-                <div className="mt-2 text-sm">
-                  Zonas: {(t.zones as string[]).join(", ")}
-                </div>
+                <div className="mt-2 text-sm">Zonas: {(t.zones as string[]).join(", ")}</div>
+                <div className="text-sm">Skills: {(t.skills as string[]).join(", ")}</div>
                 <div className="text-sm">
-                  Skills: {(t.skills as string[]).join(", ")}
-                </div>
-                <div className="text-sm">
-                  Capacidad/día: {t.capacityPerDay} ·{" "}
-                  {t.available ? "Disponible" : "No disponible"}
+                  Capacidad/día: {t.capacityPerDay} · {t.available ? "Disponible" : "No disponible"}
                 </div>
               </div>
             ))}
           </div>
         </section>
       </div>
-    </main>
+    </AppShell>
   );
 }

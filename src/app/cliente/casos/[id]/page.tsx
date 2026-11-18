@@ -32,8 +32,8 @@ export default async function ClienteCasoPage({ params }: Props) {
     <main className="mila-shell py-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/cliente" className="text-sm" style={{ color: "var(--muted)" }}>
-            ← Volver
+          <Link href="/cliente/mis-casos" className="text-sm" style={{ color: "var(--muted)" }}>
+            ← Mis casos
           </Link>
           <h1 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
             {ticket.number}

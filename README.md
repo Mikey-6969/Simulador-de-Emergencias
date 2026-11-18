@@ -36,8 +36,21 @@ Abre [http://localhost:3000](http://localhost:3000).
 - `docs/REQUISITOS_LIMPIO.md` — requisitos consolidados
 - `docs/ARQUITECTURA_MILA.md` — arquitectura
 - `docs/SPRINT5_ENTREGA.md` — alcance y demo Sprint 5
+- `docs/N8N_CONEXION.md` — conectar webhook n8n + OpenAI
 - `docs/sql/mila.sql` — DDL MySQL
 - `docs/n8n/mila-sprint5-workflow.json` — flujo n8n
+- `docs/extracted/asms_authenticated_map.md` — referencia ASMS Fanalca
+
+## Portales (patrón ASMS)
+
+- Cliente: `/cliente` (tiles, búsqueda, wizard servicio→sede→detalle)
+- Especialista: `/especialista` (sidebar, bandeja, crear caso, técnicos, logs n8n)
+
+## Docker opcional
+
+```bash
+docker compose up -d   # MySQL + n8n
+```
 
 ## Variables
 

@@ -1,0 +1,32 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: mila
+      MYSQL_USER: mila
+      MYSQL_PASSWORD: mila_dev_pass
+      MYSQL_ROOT_PASSWORD: root_dev_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mila_mysql:/var/lib/mysql
+    command: ["--default-authentication-plugin=caching_sha2_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: America/Bogota
+    volumes:
+      - mila_n8n:/home/node/.n8n
+
+volumes:
+  mila_mysql:
+  mila_n8n:

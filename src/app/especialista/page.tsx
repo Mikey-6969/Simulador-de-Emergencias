@@ -2,22 +2,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppShell } from "@/components/AppShell";
 import { PriorityChip, StatusChip } from "@/components/StatusChip";
 import { zoneLabel } from "@/lib/labels";
 
-export default async function EspecialistaPage() {
+export default async function EspecialistaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ vista?: string }>;
+}) {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role === "CLIENTE") redirect("/cliente");
 
-  const where =
-    session.role === "TECNICO"
-      ? { assigneeId: session.id }
-      : {};
+  const { vista } = await searchParams;
+  const mine = vista === "mios" || session.role === "TECNICO";
 
   const tickets = await prisma.ticket.findMany({
-    where,
+    where: mine ? { assigneeId: session.id } : {},
     orderBy: { updatedAt: "desc" },
     include: {
       customer: { select: { name: true } },
@@ -28,27 +30,42 @@ export default async function EspecialistaPage() {
   const open = tickets.filter((t) => !["CERRADA", "CANCELADA"].includes(t.status)).length;
   const escaladas = tickets.filter((t) => t.status === "ESCALADA").length;
   const asignadas = tickets.filter((t) => t.status === "ASIGNADA").length;
+  const canManage = ["COORDINADOR", "ADMIN"].includes(session.role);
 
   return (
-    <main className="mila-shell py-8">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <AppShell
+      brand="Portal Especialista"
+      subtitle="Bandeja y asignación"
+      userName={session.name}
+      nav={[
+        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
+        { href: "/especialista?vista=mios", label: "Asignados a mí" },
+        { href: "/especialista/nuevo", label: "Crear caso" },
+        ...(canManage
+          ? [
+              { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
+              { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
+            ]
+          : []),
+      ]}
+      actions={
+        <>
+          <Link href="/especialista/nuevo" className="mila-btn mila-btn-primary">
+            + Crear caso
+          </Link>
+        </>
+      }
+    >
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: "var(--brand)" }}>
-            Consola especialista
-          </p>
           <h1 className="text-3xl" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-            Bandeja · {session.name}
+            {mine ? "Asignados a mí" : "Bandeja de casos"}
           </h1>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Vista tipo ASMS: estado, sede, responsable y prioridad.
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {["COORDINADOR", "ADMIN"].includes(session.role) ? (
-            <Link href="/especialista/tecnicos" className="mila-btn mila-btn-ghost">
-              Técnicos
-            </Link>
-          ) : null}
-          <LogoutButton />
-        </div>
-      </header>
+      </div>
 
       <section className="mb-6 grid gap-3 sm:grid-cols-3">
         <div className="mila-panel p-4">
@@ -65,38 +82,47 @@ export default async function EspecialistaPage() {
         </div>
       </section>
 
-      <section className="mila-panel overflow-hidden">
-        <div className="border-b border-[var(--line)] px-5 py-4 font-semibold">Casos</div>
-        <div className="divide-y divide-[var(--line)]">
-          {tickets.length === 0 ? (
-            <p className="p-5" style={{ color: "var(--muted)" }}>
-              No hay casos en la bandeja.
-            </p>
-          ) : (
-            tickets.map((t) => (
-              <Link
-                key={t.id}
-                href={`/especialista/casos/${t.id}`}
-                className="flex flex-col gap-2 px-5 py-4 transition hover:bg-white/5 md:flex-row md:items-center md:justify-between"
-              >
-                <div>
-                  <div className="font-medium">
-                    {t.number} · {t.title}
-                  </div>
-                  <div className="text-sm" style={{ color: "var(--muted)" }}>
-                    {t.customer.name} · {zoneLabel[t.customerZone]}
-                    {t.assignee ? ` · ${t.assignee.name}` : ""}
-                  </div>
-                </div>
-                <div className="flex gap-2">
+      <section className="mila-panel overflow-x-auto">
+        <div className="min-w-[860px]">
+          <div
+            className="grid grid-cols-[1fr_1.4fr_1fr_1fr_0.9fr_0.8fr_0.8fr] gap-2 border-b border-[var(--line)] px-4 py-3 text-[11px] uppercase tracking-[0.12em]"
+            style={{ color: "var(--muted)" }}
+          >
+            <span>Caso</span>
+            <span>Asunto</span>
+            <span>Cliente</span>
+            <span>Sede / servicio</span>
+            <span>Responsable</span>
+            <span>Estado</span>
+            <span>Prioridad</span>
+          </div>
+          <div className="divide-y divide-[var(--line)]">
+            {tickets.length === 0 ? (
+              <p className="p-5" style={{ color: "var(--muted)" }}>
+                No hay casos en esta vista.
+              </p>
+            ) : (
+              tickets.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/especialista/casos/${t.id}`}
+                  className="grid grid-cols-[1fr_1.4fr_1fr_1fr_0.9fr_0.8fr_0.8fr] items-center gap-2 px-4 py-3 text-sm transition hover:bg-white/5"
+                >
+                  <strong>{t.number}</strong>
+                  <span className="truncate">{t.title}</span>
+                  <span style={{ color: "var(--muted)" }}>{t.customer.name}</span>
+                  <span style={{ color: "var(--muted)" }}>
+                    {zoneLabel[t.customerZone]} · {t.serviceType}
+                  </span>
+                  <span style={{ color: "var(--muted)" }}>{t.assignee?.name || "—"}</span>
                   <StatusChip status={t.status} />
                   <PriorityChip priority={t.priority} />
-                </div>
-              </Link>
-            ))
-          )}
+                </Link>
+              ))
+            )}
+          </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }
