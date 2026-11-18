@@ -6,7 +6,7 @@ import { allowLoginAttempt, assertSameOrigin, clientIp } from "@/lib/security";
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(10),
 });
 
 export async function POST(req: Request) {

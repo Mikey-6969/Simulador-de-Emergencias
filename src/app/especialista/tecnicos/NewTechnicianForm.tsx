@@ -63,10 +63,10 @@ export function NewTechnicianForm() {
       />
       <input
         className="mila-input"
-        placeholder="Contraseña temporal"
+        placeholder="Contraseña temporal (mín. 10)"
         type="password"
         required
-        minLength={6}
+        minLength={10}
         value={form.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />

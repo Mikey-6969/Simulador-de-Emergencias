@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 type Bucket = { count: number; resetAt: number };
-const loginBuckets = new Map<string, Bucket>();
+const rateBuckets = new Map<string, Bucket>();
 
 export function clientIp(req: Request) {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -10,16 +10,20 @@ export function clientIp(req: Request) {
 }
 
 /** Returns false when the caller exceeded the limit. */
-export function allowLoginAttempt(key: string, limit = 10, windowMs = 15 * 60 * 1000) {
+export function allowRateLimit(key: string, limit: number, windowMs: number) {
   const now = Date.now();
-  const current = loginBuckets.get(key);
+  const current = rateBuckets.get(key);
   if (!current || current.resetAt <= now) {
-    loginBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    rateBuckets.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
   if (current.count >= limit) return false;
   current.count += 1;
   return true;
+}
+
+export function allowLoginAttempt(key: string, limit = 10, windowMs = 15 * 60 * 1000) {
+  return allowRateLimit(key, limit, windowMs);
 }
 
 function normalizeHost(value: string) {
@@ -39,17 +43,15 @@ function allowedHosts(req: Request) {
   add(req.headers.get("x-forwarded-host"));
   add(process.env.APP_HOST);
   add(process.env.NEXT_PUBLIC_APP_HOST);
-  return hosts;
-}
 
-function hostMatches(candidate: string, allowed: Set<string>) {
-  const host = normalizeHost(candidate);
-  if (allowed.has(host)) return true;
-  // Cursor/public app hosts may differ from the internal Host header.
-  for (const item of allowed) {
-    if (host.endsWith(".apps.grok.bot") && item.endsWith(".apps.grok.bot")) return true;
+  const forwarded = req.headers.get("forwarded");
+  if (forwarded) {
+    for (const segment of forwarded.split(",")) {
+      const match = segment.match(/(?:^|;)\s*host=([^;]+)/i);
+      if (match?.[1]) add(match[1].replace(/^"|"$/g, ""));
+    }
   }
-  return false;
+  return hosts;
 }
 
 export function assertSameOrigin(req: Request) {
@@ -57,9 +59,8 @@ export function assertSameOrigin(req: Request) {
     return null;
   }
 
-  // Browser same-origin/same-site fetches (typical app UI -> /api/*).
-  const fetchSite = req.headers.get("sec-fetch-site");
-  if (fetchSite === "same-origin" || fetchSite === "same-site") {
+  // Strict same-origin browser fetches (UI -> /api on this app).
+  if (req.headers.get("sec-fetch-site") === "same-origin") {
     return null;
   }
 
@@ -71,7 +72,7 @@ export function assertSameOrigin(req: Request) {
   const origin = req.headers.get("origin");
   if (origin) {
     try {
-      if (hostMatches(new URL(origin).host, allowed)) return null;
+      if (allowed.has(normalizeHost(new URL(origin).host))) return null;
     } catch {
       return NextResponse.json({ error: "Origen inválido" }, { status: 403 });
     }
@@ -81,7 +82,7 @@ export function assertSameOrigin(req: Request) {
   const referer = req.headers.get("referer");
   if (referer) {
     try {
-      if (hostMatches(new URL(referer).host, allowed)) return null;
+      if (allowed.has(normalizeHost(new URL(referer).host))) return null;
     } catch {
       return NextResponse.json({ error: "Referer inválido" }, { status: 403 });
     }

@@ -21,7 +21,7 @@ export async function GET() {
 const schema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(10),
   zones: z.array(z.enum(["NORTE", "SUR", "ORIENTE", "OCCIDENTE"])).min(1),
   skills: z.array(z.string()).min(1),
   capacityPerDay: z.number().int().min(1).max(12).default(4),
