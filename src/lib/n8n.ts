@@ -1,9 +1,30 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 
+const SAFE_KEYS = new Set([
+  "ticketId",
+  "number",
+  "status",
+  "remoteAttempts",
+  "suggestedPriority",
+  "confidence",
+  "technicianId",
+]);
+
+function sanitizePayload(payload: Record<string, unknown>) {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(payload)) {
+    if (!SAFE_KEYS.has(key)) continue;
+    if (typeof value === "string") out[key] = value.slice(0, 120);
+    else if (typeof value === "number" || typeof value === "boolean") out[key] = value;
+  }
+  return out;
+}
+
 export async function emitN8nEvent(flow: string, payload: Record<string, unknown>) {
   const url = process.env.N8N_WEBHOOK_URL?.trim();
-  const jsonPayload = payload as Prisma.InputJsonValue;
+  const safe = sanitizePayload(payload);
+  const jsonPayload = safe as Prisma.InputJsonValue;
   if (!url) {
     await prisma.automationLog.create({
       data: {
@@ -20,7 +41,7 @@ export async function emitN8nEvent(flow: string, payload: Record<string, unknown
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flow, ...payload, emittedAt: new Date().toISOString() }),
+      body: JSON.stringify({ flow, ...safe, emittedAt: new Date().toISOString() }),
     });
     const text = await res.text();
     await prisma.automationLog.create({

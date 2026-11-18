@@ -54,6 +54,14 @@ function localDiagnosis(title: string, description: string, serviceType: string)
   };
 }
 
+function redactForExternalAi(text: string) {
+  return text
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+    .replace(/\+?\d[\d\s().-]{7,}\d/g, "[tel]")
+    .replace(/\b(?:cc|cedula|cédula|nit)\s*[:#-]?\s*\d[\d.\s-]{4,}\b/gi, "[id]")
+    .slice(0, 2000);
+}
+
 export async function analyzeTicket(input: {
   title: string;
   description: string;
@@ -63,12 +71,16 @@ export async function analyzeTicket(input: {
   if (!key) return localDiagnosis(input.title, input.description, input.serviceType);
 
   try {
+    const title = redactForExternalAi(input.title);
+    const description = redactForExternalAi(input.description);
+    const serviceType = redactForExternalAi(input.serviceType);
     const prompt = `Eres el agente de diagnóstico remoto de MILA (mesa de ayuda técnica en Bogotá).
 Analiza la solicitud y responde SOLO JSON con keys:
 problemSummary, ambiguities, recommendations, suggestedPriority (BAJA|MEDIA|ALTA|CRITICA), confidence (0-1).
-Título: ${input.title}
-Servicio: ${input.serviceType}
-Descripción: ${input.description}`;
+No inventes datos personales. El texto ya viene sin correos/teléfonos.
+Título: ${title}
+Servicio: ${serviceType}
+Descripción: ${description}`;
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
