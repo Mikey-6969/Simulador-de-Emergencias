@@ -10,7 +10,17 @@ const createSchema = z.object({
   serviceType: z.string().min(2),
   customerZone: z.enum(["NORTE", "SUR", "ORIENTE", "OCCIDENTE"]),
   priority: z.enum(["BAJA", "MEDIA", "ALTA", "CRITICA"]).optional(),
-  address: z.string().optional(),
+  remoteAttempts: z.number().int().min(0).max(4).optional(),
+  diagnosisSteps: z.array(z.string()).max(4).optional(),
+  images: z
+    .array(
+      z.object({
+        fileName: z.string().min(1).max(120),
+        dataUrl: z.string().min(20).max(4_000_000),
+      }),
+    )
+    .max(4)
+    .optional(),
 });
 
 export async function GET() {
@@ -49,11 +59,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Datos inválidos", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const customerId =
-    session.role === "CLIENTE" ? session.id : session.id; // coordinador puede crear en nombre propio demo
-
   const ticket = await createTicket({
-    customerId,
+    customerId: session.id,
     ...parsed.data,
   });
 

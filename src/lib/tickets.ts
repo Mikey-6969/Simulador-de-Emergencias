@@ -41,7 +41,9 @@ export async function createTicket(input: {
   serviceType: string;
   customerZone: Zone;
   priority?: Priority;
-  address?: string;
+  remoteAttempts?: number;
+  diagnosisSteps?: string[];
+  images?: Array<{ fileName: string; dataUrl: string }>;
 }) {
   const number = await nextTicketNumber();
   const ticket = await prisma.ticket.create({
@@ -52,18 +54,38 @@ export async function createTicket(input: {
       serviceType: input.serviceType,
       customerZone: input.customerZone,
       priority: input.priority ?? "MEDIA",
-      address: input.address,
       customerId: input.customerId,
       status: "EN_ANALISIS_IA",
     },
   });
 
-  await addTimeline(ticket.id, "CREATED", `Solicitud ${number} creada.`, input.customerId);
+  const attempts = input.remoteAttempts ?? 0;
+  await addTimeline(
+    ticket.id,
+    "CREATED",
+    `Solicitud ${number} creada tras ${attempts} intento(s) de diagnóstico remoto.`,
+    input.customerId,
+    { remoteAttempts: attempts },
+  );
   await emitN8nEvent("ticket.created", {
     ticketId: ticket.id,
     number: ticket.number,
     customerId: input.customerId,
+    remoteAttempts: attempts,
   });
+
+  if (input.images?.length) {
+    const { saveTicketImages } = await import("./uploads");
+    const saved = await saveTicketImages(ticket.id, input.customerId, input.images);
+    if (saved.length) {
+      await addTimeline(
+        ticket.id,
+        "ATTACHMENT",
+        `Se adjuntaron ${saved.length} imagen(es) de evidencia.`,
+        input.customerId,
+      );
+    }
+  }
 
   const ai = await analyzeTicket({
     title: input.title,
@@ -71,12 +93,17 @@ export async function createTicket(input: {
     serviceType: input.serviceType,
   });
 
+  const recommendations =
+    input.diagnosisSteps?.length
+      ? input.diagnosisSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")
+      : ai.recommendations;
+
   await prisma.aiAnalysis.create({
     data: {
       ticketId: ticket.id,
       problemSummary: ai.problemSummary,
       ambiguities: ai.ambiguities,
-      recommendations: ai.recommendations,
+      recommendations,
       suggestedPriority: ai.suggestedPriority,
       confidence: ai.confidence,
       rawResponse: ai.rawResponse,
@@ -87,7 +114,8 @@ export async function createTicket(input: {
     where: { id: ticket.id },
     data: {
       status: "DIAGNOSTICO_REMOTO",
-      priority: ai.suggestedPriority,
+      // Keep the priority chosen by the user; AI suggestion stays in analysis.
+      priority: input.priority ?? ai.suggestedPriority,
     },
   });
 
@@ -96,7 +124,7 @@ export async function createTicket(input: {
     "AI_ANALYSIS",
     `Agente IA generó diagnóstico (confianza ${(ai.confidence * 100).toFixed(0)}%).`,
     null,
-    { suggestedPriority: ai.suggestedPriority },
+    { suggestedPriority: ai.suggestedPriority, remoteAttempts: attempts },
   );
 
   await emitN8nEvent("ticket.ai_analyzed", {

@@ -30,8 +30,8 @@ export default async function RegistrarPage() {
         Registrar caso
       </h1>
       <p className="mb-6 max-w-2xl text-sm" style={{ color: "var(--muted)" }}>
-        Flujo tipo ASMS: servicio → sede → detalle. Al guardar, MILA dispara análisis IA y evento
-        n8n.
+        Flujo: servicio → sede → detalle → hasta 4 intentos de diagnóstico remoto. Solo si no se
+        resuelve se crea el caso, con prioridad e imágenes de evidencia.
       </p>
       <RegisterWizard
         defaultZone={(session.zone as "NORTE" | "SUR" | "ORIENTE" | "OCCIDENTE") || "NORTE"}

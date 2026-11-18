@@ -12,7 +12,6 @@ export function SpecialistNewCaseForm() {
     serviceType: serviceTypes[0],
     customerZone: "NORTE",
     priority: "MEDIA",
-    address: "",
   });
 
   async function onSubmit(e: FormEvent) {
@@ -89,14 +88,6 @@ export function SpecialistNewCaseForm() {
             minLength={10}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-        </label>
-        <label className="block space-y-1 text-sm">
-          <span>Dirección</span>
-          <input
-            className="mila-input"
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
           />
         </label>
       </section>

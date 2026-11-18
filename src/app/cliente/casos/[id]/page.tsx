@@ -20,6 +20,7 @@ export default async function ClienteCasoPage({ params }: Props) {
     include: {
       aiAnalyses: { orderBy: { createdAt: "desc" }, take: 1 },
       timeline: { orderBy: { createdAt: "asc" } },
+      attachments: { orderBy: { createdAt: "desc" } },
       assignee: { select: { name: true } },
     },
   });
@@ -53,6 +54,25 @@ export default async function ClienteCasoPage({ params }: Props) {
           <p style={{ color: "var(--muted)" }}>{ticket.description}</p>
           <p className="text-sm">Servicio: {ticket.serviceType}</p>
           {ticket.assignee ? <p className="text-sm">Técnico: {ticket.assignee.name}</p> : null}
+          {ticket.attachments.length ? (
+            <div className="space-y-2">
+              <h3 className="font-semibold">Evidencias</h3>
+              <div className="flex flex-wrap gap-2">
+                {ticket.attachments.map((file) => (
+                  <a
+                    key={file.id}
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block overflow-hidden rounded-xl border border-[var(--line)]"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={file.fileUrl} alt={file.fileName} className="h-24 w-24 object-cover" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {["DIAGNOSTICO_REMOTO", "PENDIENTE_ESCALAMIENTO"].includes(ticket.status) ? (
             <EscalateButton ticketId={ticket.id} />
           ) : null}
