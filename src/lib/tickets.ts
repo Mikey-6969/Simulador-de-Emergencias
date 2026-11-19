@@ -1,5 +1,7 @@
 import {
+  AiDecision,
   AssignmentStatus,
+  ClosureOutcome,
   Priority,
   Prisma,
   Role,
@@ -180,6 +182,24 @@ function skillMatchScore(skills: unknown, serviceType: string) {
   return 5;
 }
 
+async function openLoadForTechnician(technicianProfileId: string) {
+  const openAssignments = await prisma.assignment.count({
+    where: {
+      technicianProfileId,
+      status: "ASIGNADA",
+      ticket: { status: { notIn: ["CERRADA", "CANCELADA"] } },
+    },
+  });
+  const upcomingVisits = await prisma.visit.count({
+    where: {
+      technicianProfileId,
+      status: { in: ["PROGRAMADA", "EN_CURSO"] },
+      scheduledAt: { gte: new Date() },
+    },
+  });
+  return openAssignments + upcomingVisits;
+}
+
 export async function recommendTechnicians(ticketId: string) {
   const ticket = await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } });
   const technicians = await prisma.technicianProfile.findMany({
@@ -187,17 +207,18 @@ export async function recommendTechnicians(ticketId: string) {
     include: { user: true },
   });
 
-  const scored = technicians
-    .map((tech) => {
-      const openAssignments = 0;
-      const zoneScore = zoneMatchScore(tech.zones, ticket.customerZone);
-      const skillScore = skillMatchScore(tech.skills, ticket.serviceType);
-      const capacityScore = Math.max(0, 25 - openAssignments * 5);
-      const score = zoneScore + skillScore + capacityScore;
-      const rationale = `Zona ${zoneScore}/40, skills ${skillScore}/35, capacidad ${capacityScore}/25.`;
-      return { tech, score, rationale };
-    })
-    .sort((a, b) => b.score - a.score);
+  const scored = [];
+  for (const tech of technicians) {
+    const openLoad = await openLoadForTechnician(tech.id);
+    const zoneScore = zoneMatchScore(tech.zones, ticket.customerZone);
+    const skillScore = skillMatchScore(tech.skills, ticket.serviceType);
+    const remaining = Math.max(0, tech.capacityPerDay - openLoad);
+    const capacityScore = Math.min(25, remaining * 5);
+    const score = zoneScore + skillScore + capacityScore;
+    const rationale = `Zona ${zoneScore}/40, skills ${skillScore}/35, capacidad ${capacityScore}/25 (carga abierta ${openLoad}/${tech.capacityPerDay}).`;
+    scored.push({ tech, score, rationale });
+  }
+  scored.sort((a, b) => b.score - a.score);
 
   await prisma.assignment.deleteMany({
     where: { ticketId, status: "RECOMENDADA" },
@@ -305,4 +326,286 @@ export function canAccessTicket(
   if (role === "CLIENTE") return ticket.customerId === userId;
   if (role === "TECNICO") return ticket.assigneeId === userId;
   return false;
+}
+
+function windowsOverlap(
+  aStart: Date,
+  aMinutes: number,
+  bStart: Date,
+  bMinutes: number,
+) {
+  const aEnd = aStart.getTime() + aMinutes * 60_000;
+  const bEnd = bStart.getTime() + bMinutes * 60_000;
+  return aStart.getTime() < bEnd && bStart.getTime() < aEnd;
+}
+
+export async function scheduleVisit(input: {
+  ticketId: string;
+  technicianProfileId: string;
+  scheduledAt: Date;
+  windowMinutes?: number;
+  address?: string;
+  notes?: string;
+  actorId: string;
+}) {
+  const ticket = await prisma.ticket.findUniqueOrThrow({
+    where: { id: input.ticketId },
+    include: { assignee: true },
+  });
+  if (!ticket.assigneeId) {
+    throw new Error("Asigna un técnico antes de programar la visita.");
+  }
+
+  const profile = await prisma.technicianProfile.findUniqueOrThrow({
+    where: { id: input.technicianProfileId },
+    include: { user: true },
+  });
+  if (profile.userId !== ticket.assigneeId) {
+    throw new Error("La visita debe programarse con el técnico asignado al caso.");
+  }
+
+  const windowMinutes = input.windowMinutes ?? 120;
+  const dayStart = new Date(input.scheduledAt);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+
+  const dayVisits = await prisma.visit.findMany({
+    where: {
+      technicianProfileId: profile.id,
+      status: { in: ["PROGRAMADA", "EN_CURSO"] },
+      scheduledAt: { gte: dayStart, lt: dayEnd },
+    },
+  });
+
+  if (dayVisits.length >= profile.capacityPerDay) {
+    throw new Error(
+      `El técnico ya tiene ${dayVisits.length}/${profile.capacityPerDay} visitas ese día.`,
+    );
+  }
+
+  const conflict = dayVisits.find((v) =>
+    windowsOverlap(v.scheduledAt, v.windowMinutes, input.scheduledAt, windowMinutes),
+  );
+  if (conflict) {
+    throw new Error(
+      `Conflicto de agenda: ya hay visita a las ${conflict.scheduledAt.toLocaleString("es-CO")}.`,
+    );
+  }
+
+  const visit = await prisma.visit.create({
+    data: {
+      ticketId: ticket.id,
+      technicianProfileId: profile.id,
+      scheduledAt: input.scheduledAt,
+      windowMinutes,
+      address: input.address || ticket.address || null,
+      notes: input.notes || null,
+      createdBy: input.actorId,
+      status: "PROGRAMADA",
+    },
+  });
+
+  await prisma.ticket.update({
+    where: { id: ticket.id },
+    data: { status: "VISITA_PROGRAMADA" },
+  });
+
+  await addTimeline(
+    ticket.id,
+    "VISIT_SCHEDULED",
+    `Visita programada para ${input.scheduledAt.toLocaleString("es-CO")} · ${profile.user.name}`,
+    input.actorId,
+    { visitId: visit.id, scheduledAt: input.scheduledAt.toISOString() },
+  );
+
+  await emitN8nEvent("ticket.visit_scheduled", {
+    ticketId: ticket.id,
+    number: ticket.number,
+    visitId: visit.id,
+    technicianId: profile.userId,
+    technicianName: profile.user.name,
+    scheduledAt: input.scheduledAt.toISOString(),
+    status: "VISITA_PROGRAMADA",
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: profile.userId,
+      ticketId: ticket.id,
+      title: "Visita programada",
+      body: `Tienes visita para el caso ${ticket.number} el ${input.scheduledAt.toLocaleString("es-CO")}.`,
+    },
+  });
+
+  if (ticket.customerId) {
+    await prisma.notification.create({
+      data: {
+        userId: ticket.customerId,
+        ticketId: ticket.id,
+        title: "Visita confirmada",
+        body: `Se programó visita presencial para tu caso ${ticket.number}.`,
+      },
+    });
+  }
+
+  return visit;
+}
+
+export async function startAttention(ticketId: string, actorId: string) {
+  const ticket = await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } });
+  if (ticket.assigneeId !== actorId) {
+    throw new Error("Solo el técnico asignado puede iniciar la atención.");
+  }
+  if (!["ASIGNADA", "VISITA_PROGRAMADA", "EN_ATENCION"].includes(ticket.status)) {
+    throw new Error("El caso no está listo para atención en campo.");
+  }
+
+  await prisma.visit.updateMany({
+    where: { ticketId, status: "PROGRAMADA" },
+    data: { status: "EN_CURSO" },
+  });
+
+  const updated = await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { status: "EN_ATENCION" },
+  });
+
+  await addTimeline(ticketId, "ATTENTION_STARTED", "Técnico inició atención en campo.", actorId);
+  await emitN8nEvent("ticket.status_changed", {
+    ticketId,
+    number: ticket.number,
+    status: "EN_ATENCION",
+  });
+  return updated;
+}
+
+export async function closeTicket(input: {
+  ticketId: string;
+  actorId: string;
+  outcome: ClosureOutcome;
+  activities: string;
+  diagnosis: string;
+  solution: string;
+}) {
+  const ticket = await prisma.ticket.findUniqueOrThrow({ where: { id: input.ticketId } });
+  if (ticket.assigneeId !== input.actorId) {
+    throw new Error("Solo el técnico asignado puede cerrar el caso.");
+  }
+  if (!["ASIGNADA", "VISITA_PROGRAMADA", "EN_ATENCION"].includes(ticket.status)) {
+    throw new Error("El caso no admite cierre en este estado.");
+  }
+
+  const closure = await prisma.closure.create({
+    data: {
+      ticketId: input.ticketId,
+      createdBy: input.actorId,
+      outcome: input.outcome,
+      activities: input.activities,
+      diagnosis: input.diagnosis,
+      solution: input.solution,
+    },
+  });
+
+  const nextStatus: TicketStatus =
+    input.outcome === "RESUELTO"
+      ? "CERRADA"
+      : input.outcome === "NUEVA_VISITA"
+        ? "ASIGNADA"
+        : input.outcome === "ESCALADO"
+          ? "ESCALADA"
+          : "EN_ATENCION";
+
+  await prisma.ticket.update({
+    where: { id: input.ticketId },
+    data: {
+      status: nextStatus,
+      closedAt: nextStatus === "CERRADA" ? new Date() : undefined,
+    },
+  });
+
+  if (nextStatus === "CERRADA") {
+    await prisma.visit.updateMany({
+      where: { ticketId: input.ticketId, status: { in: ["PROGRAMADA", "EN_CURSO"] } },
+      data: { status: "COMPLETADA" },
+    });
+    await prisma.assignment.updateMany({
+      where: { ticketId: input.ticketId, status: "ASIGNADA" },
+      data: { status: "COMPLETADA" },
+    });
+  }
+
+  await addTimeline(
+    input.ticketId,
+    "CLOSED",
+    `Cierre registrado (${input.outcome}): ${input.solution.slice(0, 120)}`,
+    input.actorId,
+    { outcome: input.outcome, closureId: closure.id },
+  );
+
+  await emitN8nEvent("ticket.closed", {
+    ticketId: input.ticketId,
+    number: ticket.number,
+    outcome: input.outcome,
+    status: nextStatus,
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: ticket.customerId,
+      ticketId: ticket.id,
+      title: nextStatus === "CERRADA" ? "Caso cerrado" : "Actualización de cierre",
+      body: `Tu caso ${ticket.number} quedó en ${nextStatus} (${input.outcome}).`,
+    },
+  });
+
+  return closure;
+}
+
+export async function reviewAiAnalysis(input: {
+  analysisId: string;
+  actorId: string;
+  decision: AiDecision;
+  notes?: string;
+  applyPriority?: boolean;
+}) {
+  if (input.decision === "PENDIENTE") {
+    throw new Error("Selecciona aceptar, modificar o rechazar.");
+  }
+
+  const analysis = await prisma.aiAnalysis.findUniqueOrThrow({
+    where: { id: input.analysisId },
+    include: { ticket: true },
+  });
+
+  const updated = await prisma.aiAnalysis.update({
+    where: { id: analysis.id },
+    data: {
+      decision: input.decision,
+      reviewerId: input.actorId,
+      reviewerNotes: input.notes || null,
+    },
+  });
+
+  if (input.applyPriority && analysis.suggestedPriority && input.decision === "ACEPTADO") {
+    await prisma.ticket.update({
+      where: { id: analysis.ticketId },
+      data: { priority: analysis.suggestedPriority },
+    });
+  }
+
+  await addTimeline(
+    analysis.ticketId,
+    "AI_REVIEW",
+    `Revisión IA: ${input.decision}${input.notes ? ` — ${input.notes}` : ""}`,
+    input.actorId,
+  );
+
+  await emitN8nEvent("ticket.ai_reviewed", {
+    ticketId: analysis.ticketId,
+    number: analysis.ticket.number,
+    decision: input.decision,
+  });
+
+  return updated;
 }

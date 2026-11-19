@@ -27,6 +27,11 @@ export default async function EspecialistaCasoPage({ params }: Props) {
         include: { technician: { include: { user: true } } },
         orderBy: [{ score: "desc" }, { createdAt: "desc" }],
       },
+      visits: {
+        include: { technician: { include: { user: true } } },
+        orderBy: { scheduledAt: "asc" },
+      },
+      closures: { orderBy: { createdAt: "desc" }, take: 3 },
       timeline: { include: { actor: true }, orderBy: { createdAt: "asc" } },
     },
   });
@@ -37,6 +42,11 @@ export default async function EspecialistaCasoPage({ params }: Props) {
     where: { available: true },
     include: { user: true },
   });
+  const assignedProfile =
+    technicians.find((t) => t.userId === ticket.assigneeId) ||
+    ticket.assignments.find((a) => a.status === "ASIGNADA")?.technician ||
+    null;
+  const latestAi = ticket.aiAnalyses[0] || null;
 
   return (
     <main className="mila-shell py-8">
@@ -68,12 +78,16 @@ export default async function EspecialistaCasoPage({ params }: Props) {
             <p>Técnico: {ticket.assignee?.name || "Sin asignar"}</p>
           </div>
 
-          {ticket.aiAnalyses[0] ? (
+          {latestAi ? (
             <div className="rounded-2xl border border-[var(--line)] p-4 text-sm">
               <h3 className="mb-2 font-semibold">Último análisis IA</h3>
-              <p>{ticket.aiAnalyses[0].problemSummary}</p>
+              <p className="mb-1 text-xs" style={{ color: "var(--muted)" }}>
+                Decisión: {latestAi.decision}
+                {latestAi.reviewerNotes ? ` · ${latestAi.reviewerNotes}` : ""}
+              </p>
+              <p>{latestAi.problemSummary}</p>
               <pre className="mt-2 whitespace-pre-wrap opacity-90">
-                {ticket.aiAnalyses[0].recommendations}
+                {latestAi.recommendations}
               </pre>
             </div>
           ) : null}
@@ -85,6 +99,17 @@ export default async function EspecialistaCasoPage({ params }: Props) {
               <p style={{ color: "var(--muted)" }}>
                 Por {ticket.escalations[0].creator.name}
               </p>
+            </div>
+          ) : null}
+
+          {ticket.closures[0] ? (
+            <div className="rounded-2xl border border-[var(--line)] p-4 text-sm">
+              <h3 className="mb-2 font-semibold">Último cierre</h3>
+              <p>Resultado: {ticket.closures[0].outcome}</p>
+              <p className="mt-2" style={{ color: "var(--muted)" }}>
+                {ticket.closures[0].diagnosis}
+              </p>
+              <p className="mt-1">{ticket.closures[0].solution}</p>
             </div>
           ) : null}
         </section>
@@ -108,6 +133,25 @@ export default async function EspecialistaCasoPage({ params }: Props) {
               zones: t.zones as string[],
               skills: t.skills as string[],
             }))}
+            visits={ticket.visits.map((v) => ({
+              id: v.id,
+              scheduledAt: v.scheduledAt.toISOString(),
+              status: v.status,
+              address: v.address,
+              notes: v.notes,
+              technicianName: v.technician.user.name,
+            }))}
+            assignedProfileId={assignedProfile?.id || null}
+            latestAi={
+              latestAi
+                ? {
+                    id: latestAi.id,
+                    decision: latestAi.decision,
+                    suggestedPriority: latestAi.suggestedPriority,
+                    confidence: latestAi.confidence,
+                  }
+                : null
+            }
           />
 
           <div className="mila-panel p-6">

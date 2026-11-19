@@ -190,3 +190,52 @@ ALTER TABLE `Notification` ADD CONSTRAINT `Notification_userId_fkey` FOREIGN KEY
 -- AddForeignKey
 ALTER TABLE `Notification` ADD CONSTRAINT `Notification_ticketId_fkey` FOREIGN KEY (`ticketId`) REFERENCES `Ticket`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
+-- CreateTable
+CREATE TABLE `Visit` (
+    `id` VARCHAR(191) NOT NULL,
+    `ticketId` VARCHAR(191) NOT NULL,
+    `technicianProfileId` VARCHAR(191) NOT NULL,
+    `scheduledAt` DATETIME(3) NOT NULL,
+    `windowMinutes` INTEGER NOT NULL DEFAULT 120,
+    `address` TEXT NULL,
+    `notes` TEXT NULL,
+    `status` ENUM('PROGRAMADA', 'EN_CURSO', 'COMPLETADA', 'CANCELADA') NOT NULL DEFAULT 'PROGRAMADA',
+    `createdBy` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `Visit_technicianProfileId_scheduledAt_idx`(`technicianProfileId`, `scheduledAt`),
+    INDEX `Visit_ticketId_idx`(`ticketId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Closure` (
+    `id` VARCHAR(191) NOT NULL,
+    `ticketId` VARCHAR(191) NOT NULL,
+    `createdBy` VARCHAR(191) NOT NULL,
+    `outcome` ENUM('RESUELTO', 'PENDIENTE', 'NUEVA_VISITA', 'ESCALADO') NOT NULL,
+    `activities` TEXT NOT NULL,
+    `diagnosis` TEXT NOT NULL,
+    `solution` TEXT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `Closure_ticketId_idx`(`ticketId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Visit` ADD CONSTRAINT `Visit_ticketId_fkey` FOREIGN KEY (`ticketId`) REFERENCES `Ticket`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Visit` ADD CONSTRAINT `Visit_technicianProfileId_fkey` FOREIGN KEY (`technicianProfileId`) REFERENCES `TechnicianProfile`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Visit` ADD CONSTRAINT `Visit_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Closure` ADD CONSTRAINT `Closure_ticketId_fkey` FOREIGN KEY (`ticketId`) REFERENCES `Ticket`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Closure` ADD CONSTRAINT `Closure_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type NavItem = { href: string; label: string; section?: string };
 
@@ -56,6 +57,7 @@ export function AppShell({
             Sesión: <span className="text-[var(--text)]">{userName}</span>
           </div>
           <div className="flex flex-wrap gap-2">
+            <NotificationBell />
             {actions}
             <LogoutButton />
           </div>

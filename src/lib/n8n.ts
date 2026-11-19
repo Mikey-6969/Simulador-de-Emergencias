@@ -9,6 +9,12 @@ const SAFE_KEYS = new Set([
   "suggestedPriority",
   "confidence",
   "technicianId",
+  "technicianName",
+  "visitId",
+  "scheduledAt",
+  "outcome",
+  "decision",
+  "reason",
 ]);
 
 function sanitizePayload(payload: Record<string, unknown>) {

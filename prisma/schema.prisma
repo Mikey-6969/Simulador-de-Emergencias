@@ -55,6 +55,20 @@ enum AssignmentStatus {
   COMPLETADA
 }
 
+enum VisitStatus {
+  PROGRAMADA
+  EN_CURSO
+  COMPLETADA
+  CANCELADA
+}
+
+enum ClosureOutcome {
+  RESUELTO
+  PENDIENTE
+  NUEVA_VISITA
+  ESCALADO
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -67,13 +81,15 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  ticketsCreated   Ticket[]           @relation("TicketCustomer")
-  ticketsAssigned  Ticket[]           @relation("TicketAssignee")
+  ticketsCreated    Ticket[]           @relation("TicketCustomer")
+  ticketsAssigned   Ticket[]           @relation("TicketAssignee")
   technicianProfile TechnicianProfile?
-  aiReviews        AiAnalysis[]       @relation("AiReviewer")
-  escalations      Escalation[]       @relation("EscalationBy")
-  timelineEvents   TimelineEvent[]
-  notifications    Notification[]
+  aiReviews         AiAnalysis[]       @relation("AiReviewer")
+  escalations       Escalation[]       @relation("EscalationBy")
+  timelineEvents    TimelineEvent[]
+  notifications     Notification[]
+  visitsScheduled   Visit[]            @relation("VisitScheduler")
+  closures          Closure[]          @relation("ClosureBy")
 }
 
 model TechnicianProfile {
@@ -89,6 +105,7 @@ model TechnicianProfile {
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   assignments  Assignment[]
+  visits       Visit[]
 }
 
 model Ticket {
@@ -107,14 +124,16 @@ model Ticket {
   updatedAt     DateTime     @updatedAt
   closedAt      DateTime?
 
-  customer     User            @relation("TicketCustomer", fields: [customerId], references: [id])
-  assignee     User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
-  attachments  Attachment[]
-  aiAnalyses   AiAnalysis[]
-  escalations  Escalation[]
-  assignments  Assignment[]
-  timeline     TimelineEvent[]
+  customer      User            @relation("TicketCustomer", fields: [customerId], references: [id])
+  assignee      User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  attachments   Attachment[]
+  aiAnalyses    AiAnalysis[]
+  escalations   Escalation[]
+  assignments   Assignment[]
+  timeline      TimelineEvent[]
   notifications Notification[]
+  visits        Visit[]
+  closures      Closure[]
 }
 
 model Attachment {
@@ -207,4 +226,41 @@ model AutomationLog {
   response  String?  @db.Text
   error     String?  @db.Text
   createdAt DateTime @default(now())
+}
+
+model Visit {
+  id                  String      @id @default(cuid())
+  ticketId            String
+  technicianProfileId String
+  scheduledAt         DateTime
+  windowMinutes       Int         @default(120)
+  address             String?     @db.Text
+  notes               String?     @db.Text
+  status              VisitStatus @default(PROGRAMADA)
+  createdBy           String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  ticket      Ticket            @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  technician  TechnicianProfile @relation(fields: [technicianProfileId], references: [id])
+  scheduler   User              @relation("VisitScheduler", fields: [createdBy], references: [id])
+
+  @@index([technicianProfileId, scheduledAt])
+  @@index([ticketId])
+}
+
+model Closure {
+  id          String         @id @default(cuid())
+  ticketId    String
+  createdBy   String
+  outcome     ClosureOutcome
+  activities  String         @db.Text
+  diagnosis   String         @db.Text
+  solution    String         @db.Text
+  createdAt   DateTime       @default(now())
+
+  ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  creator User   @relation("ClosureBy", fields: [createdBy], references: [id])
+
+  @@index([ticketId])
 }
