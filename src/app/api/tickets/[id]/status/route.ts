@@ -29,7 +29,8 @@ export async function POST(req: Request, ctx: Ctx) {
 
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  if (!["COORDINADOR", "ADMIN", "TECNICO"].includes(session.role)) {
+  // Technicians must use /attention and /close — not free-form status changes.
+  if (!["COORDINADOR", "ADMIN"].includes(session.role)) {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
   }
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { assertSameOrigin } from "@/lib/security";
-import { scheduleVisit } from "@/lib/tickets";
+import { canAccessTicket, scheduleVisit } from "@/lib/tickets";
 import { prisma } from "@/lib/db";
 
 const schema = z.object({
@@ -20,6 +20,15 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const { id } = await ctx.params;
+  const ticket = await prisma.ticket.findUnique({
+    where: { id },
+    select: { id: true, customerId: true, assigneeId: true },
+  });
+  if (!ticket) return NextResponse.json({ error: "Caso no encontrado" }, { status: 404 });
+  if (!canAccessTicket(session.role, session.id, ticket)) {
+    return NextResponse.json({ error: "Sin permiso sobre este caso" }, { status: 403 });
+  }
+
   const visits = await prisma.visit.findMany({
     where: { ticketId: id },
     include: { technician: { include: { user: { select: { name: true } } } } },

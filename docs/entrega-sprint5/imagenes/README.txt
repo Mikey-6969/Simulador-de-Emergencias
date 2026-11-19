@@ -33,11 +33,11 @@ Case Flow Verification:
 ✅ Technician Assignment: Omar Técnico Oriente 1
 ✅ Assignment Status: ASIGNADA (visible in technician inbox)
 
-Test Credentials Used:
-======================
-Cliente:      cliente.oriente.01@mila.app / MilaZona2026*
-Especialista: especialista.oriente@mila.app / MilaZona2026*
-Técnico:      tecnico.oriente1@mila.app / MilaZona2026*
+Test Accounts Used (password from env secret MILA_DEMO_PASSWORD only):
+======================================================================
+Cliente:      cliente.oriente.01@mila.app
+Especialista: especialista.oriente@mila.app
+Técnico:      tecnico.oriente1@mila.app
 
 All screenshots saved to both:
 - /workspace/docs/entrega-sprint5/imagenes/

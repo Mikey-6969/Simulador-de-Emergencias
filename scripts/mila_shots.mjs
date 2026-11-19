@@ -2,8 +2,12 @@ import { chromium } from "playwright";
 import fs from "fs";
 import path from "path";
 
-const BASE = "http://127.0.0.1:3000";
-const PASS = "MilaZona2026*";
+const BASE = process.env.MILA_BASE_URL || "http://127.0.0.1:3000";
+const PASS = process.env.MILA_DEMO_PASSWORD?.trim();
+if (!PASS || PASS.length < 10) {
+  console.error("Set MILA_DEMO_PASSWORD in the environment before running screenshots.");
+  process.exit(1);
+}
 const OUTS = [
   "/workspace/docs/entrega-sprint5/imagenes",
   "/opt/cursor/artifacts/entrega-sprint5",

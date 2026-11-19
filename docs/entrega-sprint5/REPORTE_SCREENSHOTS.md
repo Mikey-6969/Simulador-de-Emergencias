@@ -271,9 +271,9 @@ All screenshots are:
 **Status:** COMPLETE  
 **Date:** November 18, 2026, 23:23 UTC  
 **Test Credentials Used:**
-- Cliente: `cliente.oriente.01@mila.app` / `MilaZona2026*`
-- Especialista: `especialista.oriente@mila.app` / `MilaZona2026*`
-- Técnico: `tecnico.oriente1@mila.app` / `MilaZona2026*`
+- Cliente: `cliente.oriente.01@mila.app` (password vía secret `MILA_DEMO_PASSWORD`, nunca en docs)
+- Especialista: `especialista.oriente@mila.app` (mismo secret de entorno)
+- Técnico: `tecnico.oriente1@mila.app` (mismo secret de entorno)
 
 **Case Created:** MILA-2026-00002  
 **Technician Assignment:** Confirmed ✅  
