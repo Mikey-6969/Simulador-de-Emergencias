@@ -18,8 +18,12 @@ En la app publicada: entra como ADMIN → `/especialista/usuarios` → “Cargar
    - `AUTH_SECRET` (≥16 chars)
    - `MILA_ADMIN_EMAIL` + `MILA_ADMIN_PASSWORD` (≥10) — crea el primer ADMIN al login
    - `MILA_DEMO_PASSWORD` (≥10) — para el catálogo demo
-2. Inicia sesión con el correo admin del secret.
-3. Abre `/especialista/usuarios` y carga el catálogo.
+2. Confirma el publish pendiente para que la app tome el código nuevo.
+3. Inicia sesión con el correo admin del secret.
+4. Abre `/especialista/usuarios`:
+   - **Cargar catálogo demo** (opcional)
+   - **Crear usuario** (email, nombre, rol, zona, contraseña)
+   - **Cambiar / reset** en cada fila para actualizar contraseña
 
 ## Nota sobre acceso SQL
 
