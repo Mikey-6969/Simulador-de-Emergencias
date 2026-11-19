@@ -47,6 +47,9 @@ export default async function EspecialistaPage({
               { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
             ]
           : []),
+        ...(session.role === "ADMIN"
+          ? [{ href: "/especialista/usuarios", label: "Usuarios (BD)", section: "Admin" }]
+          : []),
       ]}
       actions={
         <>
