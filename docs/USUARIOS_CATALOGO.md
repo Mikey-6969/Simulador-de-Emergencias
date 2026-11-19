@@ -12,18 +12,24 @@ En la app publicada: entra como ADMIN → `/especialista/usuarios` → “Cargar
 | TECNICO | 8 | `tecnico.{zona}{1\|2}@mila.app` |
 | CLIENTE | 40 | `cliente.{zona}.{01–10}@mila.app` |
 
-## Primer acceso en la app publicada
+## Primer acceso en la app publicada (login roto → checklist)
 
-1. En Cursor Secrets / Publish Settings define:
-   - `AUTH_SECRET` (≥16 chars)
-   - `MILA_ADMIN_EMAIL` + `MILA_ADMIN_PASSWORD` (≥10) — crea el primer ADMIN al login
-   - `MILA_DEMO_PASSWORD` (≥10) — para el catálogo demo
-2. Confirma el publish pendiente para que la app tome el código nuevo.
-3. Inicia sesión con el correo admin del secret.
-4. Abre `/especialista/usuarios`:
-   - **Cargar catálogo demo** (opcional)
-   - **Crear usuario** (email, nombre, rol, zona, contraseña)
-   - **Cambiar / reset** en cada fila para actualizar contraseña
+El error *"Revisa la configuración del servidor"* casi siempre es **AUTH_SECRET faltante**.
+Sin `MILA_DEMO_PASSWORD` la BD hospedada no tiene `cliente.*@mila.app`.
+
+1. En Cursor → Secrets / Publish Settings agrega:
+   - `AUTH_SECRET` (≥16 caracteres, obligatorio)
+   - `MILA_DEMO_PASSWORD` (≥10) — misma contraseña para el catálogo demo
+   - `MILA_ADMIN_EMAIL` + `MILA_ADMIN_PASSWORD` (≥10) — primer ADMIN
+2. Confirma el **publish** pendiente (la app debe redeployar con secrets).
+3. Abre `https://suport-mila.apps.grok.bot/api/health` — debe mostrar:
+   - `authSecret: "configured"`
+   - `demoSeedSecret: "configured"`
+   - `database: "ok"`
+4. Login (tras el primer intento, el server siembra el catálogo si hay `MILA_DEMO_PASSWORD`):
+   - Demo: `cliente.oriente.01@mila.app` + el valor de `MILA_DEMO_PASSWORD`
+   - Admin: el correo de `MILA_ADMIN_EMAIL` + `MILA_ADMIN_PASSWORD`
+5. ADMIN → `/especialista/usuarios` para crear usuarios o resetear contraseñas.
 
 ## Nota sobre acceso SQL
 
