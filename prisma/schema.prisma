@@ -1,0 +1,266 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENTE
+  TECNICO
+  COORDINADOR
+  ADMIN
+}
+
+enum TicketStatus {
+  NUEVA
+  EN_ANALISIS_IA
+  DIAGNOSTICO_REMOTO
+  PENDIENTE_ESCALAMIENTO
+  ESCALADA
+  ASIGNADA
+  VISITA_PROGRAMADA
+  EN_ATENCION
+  CERRADA
+  CANCELADA
+}
+
+enum Zone {
+  NORTE
+  SUR
+  ORIENTE
+  OCCIDENTE
+}
+
+enum Priority {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum AiDecision {
+  PENDIENTE
+  ACEPTADO
+  MODIFICADO
+  RECHAZADO
+}
+
+enum AssignmentStatus {
+  RECOMENDADA
+  ASIGNADA
+  RECHAZADA
+  COMPLETADA
+}
+
+enum VisitStatus {
+  PROGRAMADA
+  EN_CURSO
+  COMPLETADA
+  CANCELADA
+}
+
+enum ClosureOutcome {
+  RESUELTO
+  PENDIENTE
+  NUEVA_VISITA
+  ESCALADO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role     @default(CLIENTE)
+  zone         Zone?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticketsCreated    Ticket[]           @relation("TicketCustomer")
+  ticketsAssigned   Ticket[]           @relation("TicketAssignee")
+  technicianProfile TechnicianProfile?
+  aiReviews         AiAnalysis[]       @relation("AiReviewer")
+  escalations       Escalation[]       @relation("EscalationBy")
+  timelineEvents    TimelineEvent[]
+  notifications     Notification[]
+  visitsScheduled   Visit[]            @relation("VisitScheduler")
+  closures          Closure[]          @relation("ClosureBy")
+}
+
+model TechnicianProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  zones          Json
+  skills         Json
+  capacityPerDay Int      @default(4)
+  available      Boolean  @default(true)
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments  Assignment[]
+  visits       Visit[]
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  number        String       @unique
+  title         String
+  description   String       @db.Text
+  status        TicketStatus @default(NUEVA)
+  priority      Priority     @default(MEDIA)
+  serviceType   String
+  customerZone  Zone
+  address       String?      @db.Text
+  customerId    String
+  assigneeId    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  closedAt      DateTime?
+
+  customer      User            @relation("TicketCustomer", fields: [customerId], references: [id])
+  assignee      User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  attachments   Attachment[]
+  aiAnalyses    AiAnalysis[]
+  escalations   Escalation[]
+  assignments   Assignment[]
+  timeline      TimelineEvent[]
+  notifications Notification[]
+  visits        Visit[]
+  closures      Closure[]
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  ticketId   String
+  fileName   String
+  fileUrl    String
+  uploadedBy String?
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model AiAnalysis {
+  id              String     @id @default(cuid())
+  ticketId        String
+  problemSummary  String     @db.Text
+  ambiguities     String?    @db.Text
+  recommendations String     @db.Text
+  suggestedPriority Priority?
+  confidence      Float      @default(0.7)
+  rawResponse     String?    @db.Text
+  decision        AiDecision @default(PENDIENTE)
+  reviewerId      String?
+  reviewerNotes   String?    @db.Text
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  reviewer User?  @relation("AiReviewer", fields: [reviewerId], references: [id])
+}
+
+model Escalation {
+  id        String   @id @default(cuid())
+  ticketId  String
+  reason    String   @db.Text
+  createdBy String
+  createdAt DateTime @default(now())
+
+  ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  creator User   @relation("EscalationBy", fields: [createdBy], references: [id])
+}
+
+model Assignment {
+  id                   String           @id @default(cuid())
+  ticketId             String
+  technicianProfileId  String
+  status               AssignmentStatus @default(RECOMENDADA)
+  score                Float?
+  rationale            String?          @db.Text
+  assignedAt           DateTime?
+  createdAt            DateTime         @default(now())
+
+  ticket      Ticket            @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  technician  TechnicianProfile @relation(fields: [technicianProfileId], references: [id])
+}
+
+model TimelineEvent {
+  id        String   @id @default(cuid())
+  ticketId  String
+  actorId   String?
+  type      String
+  message   String   @db.Text
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor  User?  @relation(fields: [actorId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  ticketId  String?
+  channel   String   @default("IN_APP")
+  title     String
+  body      String   @db.Text
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticket Ticket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+}
+
+model AutomationLog {
+  id        String   @id @default(cuid())
+  flow      String
+  success   Boolean
+  payload   Json?
+  response  String?  @db.Text
+  error     String?  @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Visit {
+  id                  String      @id @default(cuid())
+  ticketId            String
+  technicianProfileId String
+  scheduledAt         DateTime
+  windowMinutes       Int         @default(120)
+  address             String?     @db.Text
+  notes               String?     @db.Text
+  status              VisitStatus @default(PROGRAMADA)
+  createdBy           String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  ticket      Ticket            @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  technician  TechnicianProfile @relation(fields: [technicianProfileId], references: [id])
+  scheduler   User              @relation("VisitScheduler", fields: [createdBy], references: [id])
+
+  @@index([technicianProfileId, scheduledAt])
+  @@index([ticketId])
+}
+
+model Closure {
+  id          String         @id @default(cuid())
+  ticketId    String
+  createdBy   String
+  outcome     ClosureOutcome
+  activities  String         @db.Text
+  diagnosis   String         @db.Text
+  solution    String         @db.Text
+  createdAt   DateTime       @default(now())
+
+  ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  creator User   @relation("ClosureBy", fields: [createdBy], references: [id])
+
+  @@index([ticketId])
+}

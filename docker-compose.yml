@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mila}
+      POSTGRES_USER: ${POSTGRES_USER:-mila}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
+    ports:
+      - "5432:5432"
+    volumes:
+      - mila_pg:/var/lib/postgresql/data
+
+  n8n:
+    image: n8nio/n8n:1.82.4
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: America/Bogota
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Set N8N_ENCRYPTION_KEY in your environment}
+    volumes:
+      - mila_n8n:/home/node/.n8n
+
+volumes:
+  mila_pg:
+  mila_n8n:
