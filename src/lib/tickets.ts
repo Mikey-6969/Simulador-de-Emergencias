@@ -189,6 +189,13 @@ export async function runAiPipeline(ticketId: string, opts: { force?: boolean } 
     confidence: ai.confidence,
   });
 
+  await notifyUser({
+    userId: ticket.customerId,
+    ticketId,
+    title: "Respuesta a tu solicitud",
+    body: `El agente IA analizó tu caso ${ticket.number} y preparó una respuesta con recomendaciones.`,
+  });
+
   return updated;
 }
 
@@ -398,6 +405,12 @@ export async function assignTechnician(
       title: "Nueva asignación MILA",
       body: `Se te asignó el caso ${ticket.number}.`,
     });
+  await notifyUser({
+    userId: ticket.customerId,
+    ticketId,
+    title: "Técnico asignado a tu caso",
+    body: `Asignamos a ${profile.user.name} para atender tu caso ${ticket.number}.`,
+  });
 
   return ticket;
 }

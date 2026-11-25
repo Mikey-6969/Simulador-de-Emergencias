@@ -8,6 +8,7 @@ type UserRow = {
   name: string;
   role: string;
   zone: string | null;
+  phone?: string | null;
   active: boolean;
 };
 
@@ -24,6 +25,7 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
   const [role, setRole] = useState<(typeof ROLES)[number]>("CLIENTE");
   const [zone, setZone] = useState<(typeof ZONES)[number]>("ORIENTE");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [resetId, setResetId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState("");
@@ -56,6 +58,7 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
         role,
         zone: needsZone ? zone : null,
         password,
+        phone: phone.trim() || null,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -68,6 +71,7 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
     setEmail("");
     setName("");
     setPassword("");
+    setPhone("");
     await refresh();
   }
 
@@ -125,6 +129,16 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
               </select>
             </label>
           ) : null}
+          <label className="block space-y-1 text-sm">
+            <span>Celular (WhatsApp)</span>
+            <input
+              className="mila-input"
+              inputMode="tel"
+              placeholder="3001234567"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </label>
           <label className="block space-y-1 text-sm md:col-span-2">
             <span>Contraseña inicial (≥10)</span>
             <input
@@ -144,13 +158,14 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
       <section className="mila-panel overflow-x-auto">
         <div className="min-w-[860px]">
           <div
-            className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.7fr_0.5fr_1.2fr] gap-2 border-b border-[var(--line)] px-4 py-3 text-[11px] uppercase tracking-[0.12em]"
+            className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.7fr_0.9fr_0.5fr_1.2fr] gap-2 border-b border-[var(--line)] px-4 py-3 text-[11px] uppercase tracking-[0.12em]"
             style={{ color: "var(--muted)" }}
           >
             <span>Correo</span>
             <span>Nombre</span>
             <span>Rol</span>
             <span>Zona</span>
+            <span>Celular</span>
             <span>Activo</span>
             <span>Contraseña</span>
           </div>
@@ -163,12 +178,13 @@ export function UserAdminPanel({ initialUsers }: { initialUsers: UserRow[] }) {
               sorted.map((u) => (
                 <div
                   key={u.id}
-                  className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.7fr_0.5fr_1.2fr] gap-2 px-4 py-3 text-sm"
+                  className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.7fr_0.9fr_0.5fr_1.2fr] gap-2 px-4 py-3 text-sm"
                 >
                   <span className="font-medium">{u.email}</span>
                   <span>{u.name}</span>
                   <span>{u.role}</span>
                   <span>{u.zone || "—"}</span>
+                  <span>{u.phone || "—"}</span>
                   <span>{u.active ? "Sí" : "No"}</span>
                   <div className="space-y-2">
                     {resetId === u.id ? (

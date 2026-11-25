@@ -20,6 +20,7 @@ export async function GET() {
       name: true,
       role: true,
       zone: true,
+      phone: true,
       active: true,
       createdAt: true,
     },
@@ -44,6 +45,11 @@ const createSchema = z.object({
   role: z.enum(["CLIENTE", "TECNICO", "COORDINADOR", "ADMIN"]),
   zone: z.enum(["NORTE", "SUR", "ORIENTE", "OCCIDENTE"]).optional().nullable(),
   password: z.string().min(10).max(128),
+  phone: z
+    .string()
+    .regex(/^[0-9+\s()-]{7,20}$/)
+    .optional()
+    .nullable(),
   active: z.boolean().optional(),
 });
 
@@ -92,6 +98,7 @@ export async function POST(req: Request) {
       name: parsed.data.name.trim(),
       role,
       zone: role === "ADMIN" ? null : zone,
+      phone: parsed.data.phone?.trim() || null,
       passwordHash,
       active: parsed.data.active ?? true,
     },
@@ -101,6 +108,7 @@ export async function POST(req: Request) {
       name: true,
       role: true,
       zone: true,
+      phone: true,
       active: true,
       createdAt: true,
     },

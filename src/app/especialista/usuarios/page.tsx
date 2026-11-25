@@ -19,6 +19,7 @@ export default async function UsuariosAdminPage() {
       name: true,
       role: true,
       zone: true,
+      phone: true,
       active: true,
     },
   });

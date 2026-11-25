@@ -23,10 +23,10 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "El evento ya fue entregado." }, { status: 409 });
   }
 
-  const payload = (log.payload ?? {}) as { notificationId?: string };
+  const payload = (log.payload ?? {}) as { notificationId?: string; channel?: "email" | "whatsapp" };
   const result =
     log.flow === "notification.external" && payload.notificationId
-      ? await dispatchExternal(payload.notificationId)
+      ? await dispatchExternal(payload.notificationId, payload.channel)
       : await retryAutomationLog(id);
   if (result.ok && !("skipped" in result && result.skipped)) {
     await prisma.automationLog.update({

@@ -75,7 +75,32 @@ Variables del proceso de n8n: `MILA_URL`, `MILA_CALLBACK_SECRET`, `MILA_MAIL_FRO
 
 Los payloads de eventos se sanitizan (lista blanca de campos, sin datos personales). Los fallos quedan en `/especialista/automatizacion` con botón **Reintentar**.
 
-## 7. Pruebas
+## 7. Correo y WhatsApp directos desde MILA
+
+Cada notificación se envía por **correo** (si el usuario tiene email) y por **WhatsApp** (si tiene celular), con la información del caso: número, asunto, estado, prioridad, servicio, zona, técnico y contacto, respuesta/recomendación de la IA, próxima visita y solución. Eventos: solicitud registrada, respuesta IA, cambio de estado, escalamiento, técnico asignado (cliente y técnico), visitas y cierre.
+
+Cada canal usa el proveedor directo si está configurado; si no, cae al webhook `NOTIFY_WEBHOOK_URL` (n8n) con `channel: "email" | "whatsapp"`.
+
+```env
+# Correo (SMTP). Gmail: smtp.gmail.com / 587 con contraseña de aplicación
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=cuenta@gmail.com
+SMTP_PASS=contraseña-de-aplicación
+SMTP_FROM="MILA <cuenta@gmail.com>"
+
+# WhatsApp Cloud API (Meta). Fuera de la ventana de 24 h exige plantilla aprobada
+WHATSAPP_TOKEN=...
+WHATSAPP_PHONE_ID=...
+WHATSAPP_TEMPLATE=       # opcional: plantilla con 1 variable de cuerpo
+MILA_PUBLIC_URL=https://mila-mesa-de-ayuda.vercel.app
+```
+
+El celular se registra al crear el usuario en `/especialista/usuarios` (10 dígitos; se normaliza a +57). Los fallos por canal quedan en `/especialista/automatizacion` y se reintentan solo para ese canal.
+
+Prueba local de punta a punta: `node scripts/demo_notificaciones_canales.mjs` (ver cabecera del script).
+
+## 8. Pruebas
 
 ```bash
 npm test          # unitarias (Vitest)
