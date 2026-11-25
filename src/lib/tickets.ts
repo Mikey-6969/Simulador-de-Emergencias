@@ -10,7 +10,8 @@ import {
 } from "@prisma/client";
 import { prisma } from "./db";
 import { analyzeTicket } from "./ai";
-import { emitN8nEvent } from "./n8n";
+import { aiViaN8nEnabled, emitN8nEvent } from "./n8n";
+import { notifyUser } from "./notify";
 import { addDays, formatDateTime, startOfBogotaDay } from "./time";
 
 async function nextTicketNumber() {
@@ -63,19 +64,14 @@ export async function createTicket(input: {
   });
 
   const attempts = input.remoteAttempts ?? 0;
+  const diagnosisSteps = (input.diagnosisSteps ?? []).slice(0, 6).map((x) => x.slice(0, 300));
   await addTimeline(
     ticket.id,
     "CREATED",
     `Solicitud ${number} creada tras ${attempts} intento(s) de diagnóstico remoto.`,
     input.customerId,
-    { remoteAttempts: attempts },
+    { remoteAttempts: attempts, diagnosisSteps, priorityChosen: Boolean(input.priority) },
   );
-  await emitN8nEvent("ticket.created", {
-    ticketId: ticket.id,
-    number: ticket.number,
-    customerId: input.customerId,
-    remoteAttempts: attempts,
-  });
 
   if (input.images?.length) {
     const { saveTicketImages } = await import("./uploads");
@@ -90,20 +86,76 @@ export async function createTicket(input: {
     }
   }
 
-  const ai = await analyzeTicket({
-    title: input.title,
-    description: input.description,
-    serviceType: input.serviceType,
+  const viaN8n = aiViaN8nEnabled();
+  if (viaN8n) {
+    await addTimeline(
+      ticket.id,
+      "AI_PENDING",
+      "Análisis IA delegado al flujo n8n; se actualizará al recibir el resultado.",
+      null,
+    );
+  }
+  const emitted = await emitN8nEvent("ticket.created", {
+    ticketId: ticket.id,
+    number: ticket.number,
+    customerId: input.customerId,
+    remoteAttempts: attempts,
+    aiViaN8n: viaN8n,
   });
 
-  const recommendations =
-    input.diagnosisSteps?.length
-      ? input.diagnosisSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")
-      : ai.recommendations;
+  await notifyUser({
+    userId: input.customerId,
+    ticketId: ticket.id,
+    title: "Solicitud registrada",
+    body: `Recibimos tu solicitud ${number}. El agente IA está preparando el diagnóstico.`,
+  });
+
+  if (viaN8n && emitted.ok && !emitted.skipped) return ticket;
+  if (viaN8n) {
+    await addTimeline(
+      ticket.id,
+      "AI_FALLBACK",
+      "n8n no respondió; el análisis IA se ejecutó localmente.",
+      null,
+    );
+  }
+
+  return runAiPipeline(ticket.id);
+}
+
+export async function runAiPipeline(ticketId: string, opts: { force?: boolean } = {}) {
+  const ticket = await prisma.ticket.findUniqueOrThrow({
+    where: { id: ticketId },
+    include: { aiAnalyses: { select: { id: true } } },
+  });
+  if (!opts.force && ticket.aiAnalyses.length > 0) {
+    return { ...ticket, alreadyAnalyzed: true as const };
+  }
+
+  const created = await prisma.timelineEvent.findFirst({
+    where: { ticketId, type: "CREATED" },
+    orderBy: { createdAt: "asc" },
+  });
+  const meta = (created?.meta ?? {}) as {
+    remoteAttempts?: number;
+    diagnosisSteps?: string[];
+    priorityChosen?: boolean;
+  };
+  const attempts = meta.remoteAttempts ?? 0;
+
+  const ai = await analyzeTicket({
+    title: ticket.title,
+    description: ticket.description,
+    serviceType: ticket.serviceType,
+  });
+
+  const recommendations = meta.diagnosisSteps?.length
+    ? meta.diagnosisSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")
+    : ai.recommendations;
 
   await prisma.aiAnalysis.create({
     data: {
-      ticketId: ticket.id,
+      ticketId,
       problemSummary: ai.problemSummary,
       ambiguities: ai.ambiguities,
       recommendations,
@@ -113,17 +165,17 @@ export async function createTicket(input: {
     },
   });
 
+  const advance = ["EN_ANALISIS_IA", "NUEVA"].includes(ticket.status);
   const updated = await prisma.ticket.update({
-    where: { id: ticket.id },
+    where: { id: ticketId },
     data: {
-      status: "DIAGNOSTICO_REMOTO",
-      // Keep the priority chosen by the user; AI suggestion stays in analysis.
-      priority: input.priority ?? ai.suggestedPriority,
+      status: advance ? "DIAGNOSTICO_REMOTO" : undefined,
+      priority: meta.priorityChosen ? undefined : ai.suggestedPriority,
     },
   });
 
   await addTimeline(
-    ticket.id,
+    ticketId,
     "AI_ANALYSIS",
     `Agente IA generó diagnóstico (confianza ${(ai.confidence * 100).toFixed(0)}%).`,
     null,
@@ -131,7 +183,7 @@ export async function createTicket(input: {
   );
 
   await emitN8nEvent("ticket.ai_analyzed", {
-    ticketId: ticket.id,
+    ticketId,
     number: ticket.number,
     suggestedPriority: ai.suggestedPriority,
     confidence: ai.confidence,
@@ -154,6 +206,14 @@ export async function changeTicketStatus(
   });
   await addTimeline(ticketId, "STATUS", `Estado actualizado a ${status}.`, actorId);
   await emitN8nEvent("ticket.status_changed", { ticketId, status });
+  if (actorId !== ticket.customerId) {
+    await notifyUser({
+      userId: ticket.customerId,
+      ticketId,
+      title: "Cambio de estado",
+      body: `Tu caso ${ticket.number} ahora está en ${status}.`,
+    });
+  }
   return ticket;
 }
 
@@ -167,6 +227,32 @@ export async function escalateTicket(ticketId: string, reason: string, actorId: 
   });
   await addTimeline(ticketId, "ESCALATED", `Caso escalado: ${reason}`, actorId);
   await emitN8nEvent("ticket.escalated", { ticketId, reason });
+  const coordinators = await prisma.user.findMany({
+    where: {
+      active: true,
+      role: "COORDINADOR",
+      OR: [{ zone: ticket.customerZone }, { zone: null }],
+      id: { not: actorId },
+    },
+    select: { id: true },
+    take: 10,
+  });
+  for (const c of coordinators) {
+    await notifyUser({
+      userId: c.id,
+      ticketId,
+      title: "Caso escalado",
+      body: `El caso ${ticket.number} requiere asignación de técnico.`,
+    });
+  }
+  if (actorId !== ticket.customerId) {
+    await notifyUser({
+      userId: ticket.customerId,
+      ticketId,
+      title: "Caso escalado a visita",
+      body: `Tu caso ${ticket.number} fue escalado para atención presencial.`,
+    });
+  }
   return ticket;
 }
 
@@ -306,14 +392,12 @@ export async function assignTechnician(
     technicianName: profile.user.name,
   });
 
-  await prisma.notification.create({
-    data: {
+  await notifyUser({
       userId: profile.userId,
       ticketId,
       title: "Nueva asignación MILA",
       body: `Se te asignó el caso ${ticket.number}.`,
-    },
-  });
+    });
 
   return ticket;
 }
@@ -441,24 +525,20 @@ export async function scheduleVisit(input: {
     status: "VISITA_PROGRAMADA",
   });
 
-  await prisma.notification.create({
-    data: {
+  await notifyUser({
       userId: profile.userId,
       ticketId: ticket.id,
       title: "Visita programada",
       body: `Tienes visita para el caso ${ticket.number} el ${formatDateTime(input.scheduledAt)}.`,
-    },
-  });
+    });
 
   if (ticket.customerId) {
-    await prisma.notification.create({
-      data: {
+    await notifyUser({
         userId: ticket.customerId,
         ticketId: ticket.id,
         title: "Visita confirmada",
         body: `Se programó visita presencial para tu caso ${ticket.number}.`,
-      },
-    });
+      });
   }
 
   return visit;
@@ -500,14 +580,12 @@ export async function updateVisit(input: {
       number: visit.ticket.number,
       visitId: visit.id,
     });
-    await prisma.notification.create({
-      data: {
+    await notifyUser({
         userId: visit.technician.userId,
         ticketId: visit.ticketId,
         title: "Visita cancelada",
         body: `Se canceló la visita del caso ${visit.ticket.number} (${formatDateTime(visit.scheduledAt)}).`,
-      },
-    });
+      });
     return { visitId: visit.id, status: "CANCELADA" as const };
   }
 
@@ -531,14 +609,12 @@ export async function updateVisit(input: {
     visitId: visit.id,
     scheduledAt: input.scheduledAt.toISOString(),
   });
-  await prisma.notification.create({
-    data: {
+  await notifyUser({
       userId: visit.technician.userId,
       ticketId: visit.ticketId,
       title: "Visita reprogramada",
       body: `Caso ${visit.ticket.number}: nueva fecha ${formatDateTime(input.scheduledAt)}.`,
-    },
-  });
+    });
   return { visitId: updated.id, status: updated.status };
 }
 
@@ -660,14 +736,12 @@ export async function closeTicket(input: {
     status: nextStatus,
   });
 
-  await prisma.notification.create({
-    data: {
+  await notifyUser({
       userId: ticket.customerId,
       ticketId: ticket.id,
       title: nextStatus === "CERRADA" ? "Caso cerrado" : "Actualización de cierre",
       body: `Tu caso ${ticket.number} quedó en ${nextStatus} (${input.outcome}).`,
-    },
-  });
+    });
 
   return closure;
 }

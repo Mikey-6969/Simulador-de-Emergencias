@@ -1,11 +1,11 @@
 # Product Backlog actualizado — MILA
-**Corte:** 2026-11-20 · Equipo 1 · TS5C
+**Corte:** 2026-11-25 · Equipo 1 · TS5C
 ## Resumen
 | Bloque | Estado |
 |---|---|
 | Sprint 5 (PB-012…016) | **Hecho — entregado** |
 | Sprint 6 (PB-017…021) | **Hecho — por aceptar** (PO) |
-| Sprint 7 (trazabilidad/n8n/reportes) | Parcial / pendiente |
+| Sprint 7 (PB-022…028, 030) | **Hecho — por aceptar** (PO) |
 
 ## Detalle
 | ID | Sprint | Estado | Nota |
@@ -19,8 +19,8 @@
 | PB-004 | Sprint 3 | Hecho | Adjuntos de imagen en creación de caso; descarga controlada por API. |
 | PB-005 | Sprint 3 | Hecho | Número visible MILA-AAAA-##### y timestamps automáticos. |
 | PB-006 | Sprint 3 | Hecho | Mis casos + detalle con estado y timeline. |
-| PB-031 | Sprint 3 | Parcial | Docs n8n + plantilla workflow Sprint 5; ampliar operación. |
-| PB-032 | Sprint 3/7 | En curso | App publicada (suport-mila); endurecer secrets/seed y cierre académico. |
+| PB-031 | Sprint 3/7 | Hecho | Docs n8n y plantillas (eventos/IA y correo). |
+| PB-032 | Sprint 3/7 | Hecho | Despliegue público: https://mila-mesa-de-ayuda.vercel.app |
 | PB-007 | Sprint 4 | Hecho | Análisis IA al crear caso (motor local u OpenAI si hay clave). |
 | PB-008 | Sprint 4 | Hecho | Resumen, ambigüedades, recomendaciones y prioridad sugerida. |
 | PB-009 | Sprint 4 | Hecho | Prediagnóstico remoto en wizard (hasta 4 intentos). |
@@ -36,13 +36,13 @@
 | PB-019 | Sprint 6 | Hecho — Sprint 6 | Cierre con actividades, diagnóstico y solución. |
 | PB-020 | Sprint 6 | Hecho — Sprint 6 | Outcome RESUELTO/PENDIENTE/NUEVA_VISITA/ESCALADO. |
 | PB-021 | Sprint 6 | Hecho — Sprint 6 | Evidencias fotográficas (hasta 4) asociadas al cierre; almacenadas en BD. |
-| PB-022 | Sprint 7 | Parcial — Sprint 7 | Timeline en detalle de caso; falta vista global avanzada. |
-| PB-023 | Sprint 7 | Parcial — Sprint 7 | Emisión webhook n8n + AutomationLog; flujo rico pendiente. |
-| PB-024 | Sprint 7 | Parcial — Sprint 7 | IA en app; orquestación completa vía n8n opcional. |
-| PB-025 | Sprint 7 | Parcial — Sprint 7 | Notificaciones in-app + campana; faltan canales externos. |
-| PB-026 | Sprint 7 | Parcial — Sprint 7 | Página Logs n8n / IA para administrador/coordinador. |
-| PB-027 | Sprint 7 | Pendiente — Sprint 7 | Reportes por periodo/estado/zona aún no embarcados. |
-| PB-028 | Sprint 7 | Pendiente — Sprint 7 | Métricas de tiempos de atención/resolución pendientes. |
-| PB-030 | Sprint 7 | Parcial | Pruebas de flujo/demo y humo API; suite formal pendiente. |
+| PB-022 | Sprint 7 | Hecho — Sprint 7 | Línea de tiempo global con filtros y paginación (/especialista/trazabilidad). |
+| PB-023 | Sprint 7 | Hecho — Sprint 7 | Webhook firmado (HMAC), reintento, sanitización y plantilla n8n validada. |
+| PB-024 | Sprint 7 | Hecho — Sprint 7 | IA vía n8n (AI_VIA_N8N) con callback idempotente y fallback local. |
+| PB-025 | Sprint 7 | Hecho — Sprint 7 | In-app + canal externo por webhook; correo real requiere SMTP en n8n. |
+| PB-026 | Sprint 7 | Hecho — Sprint 7 | Consola con filtros, contadores y reintento de eventos fallidos. |
+| PB-027 | Sprint 7 | Hecho — Sprint 7 | Reportes por periodo/estado/zona/prioridad/servicio y CSV. |
+| PB-028 | Sprint 7 | Hecho — Sprint 7 | Tiempos de primera atención, asignación y resolución (global y por zona). |
+| PB-030 | Sprint 7 | Hecho — Sprint 7 | Vitest: 16 unitarias + 8 de integración (npm test / npm run test:e2e). |
 
-Ver Word: `docs/entrega-sprint5/04_BACKLOG_PRODUCTO_ACTUALIZADO_MILA.docx`.
+Ver Word: `docs/entrega-sprint7/04_BACKLOG_PRODUCTO_ACTUALIZADO_SPRINT7.docx`.

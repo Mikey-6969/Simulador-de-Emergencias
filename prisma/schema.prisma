@@ -207,6 +207,9 @@ model TimelineEvent {
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   actor  User?  @relation(fields: [actorId], references: [id])
+
+  @@index([createdAt])
+  @@index([ticketId, createdAt])
 }
 
 model Notification {
@@ -216,6 +219,7 @@ model Notification {
   channel   String   @default("IN_APP")
   title     String
   body      String   @db.Text
+  externalStatus String?
   readAt    DateTime?
   createdAt DateTime @default(now())
 

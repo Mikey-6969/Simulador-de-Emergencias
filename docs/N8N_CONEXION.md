@@ -40,6 +40,7 @@ Reinicia `npm run dev`.
 | `ticket.status_changed` | Cambio de estado |
 | `ticket.escalated` | Escalamiento |
 | `ticket.assigned` | Asignación de técnico |
+| `notification.external` | Envío de notificación por canal externo (correo vía n8n) |
 
 Cada emisión queda en `AutomationLog` (`/especialista/automatizacion`).
 
@@ -52,3 +53,31 @@ curl -X POST http://127.0.0.1:5678/webhook/mila-events \
 ```
 
 Luego crea un caso en `/cliente/registrar` y verifica ejecución en n8n + log en MILA.
+
+## 6. Sprint 7: IA orquestada y notificaciones externas
+
+Plantillas importables:
+
+- `docs/n8n/mila-sprint7-eventos-ia.json` — webhook `mila-events` → responde 200 → llama a `POST {MILA_URL}/api/automation/ai-analyze` con `x-mila-secret`.
+- `docs/n8n/mila-sprint7-notificaciones.json` — webhook `mila-notify` → correo (requiere credencial SMTP).
+
+Variables de entorno de MILA:
+
+```env
+N8N_WEBHOOK_URL=http://127.0.0.1:5678/webhook/mila-events
+N8N_WEBHOOK_SECRET=...        # firma HMAC en x-mila-signature (opcional)
+AI_VIA_N8N=true               # delega el análisis de IA a n8n (fallback local si falla)
+N8N_CALLBACK_SECRET=...       # secreto que n8n envía en x-mila-secret al callback de IA
+NOTIFY_WEBHOOK_URL=http://127.0.0.1:5678/webhook/mila-notify
+```
+
+Variables del proceso de n8n: `MILA_URL`, `MILA_CALLBACK_SECRET`, `MILA_MAIL_FROM`.
+
+Los payloads de eventos se sanitizan (lista blanca de campos, sin datos personales). Los fallos quedan en `/especialista/automatizacion` con botón **Reintentar**.
+
+## 7. Pruebas
+
+```bash
+npm test          # unitarias (Vitest)
+MILA_E2E_URL=http://127.0.0.1:3100 MILA_DEMO_PASSWORD=... npm run test:e2e  # integración contra un servidor corriendo
+```

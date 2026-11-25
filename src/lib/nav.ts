@@ -13,6 +13,8 @@ export function specialistNav(role: Role): NavItem[] {
   if (manage) {
     items.push(
       { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
+      { href: "/especialista/trazabilidad", label: "Línea de tiempo global", section: "Trazabilidad" },
+      { href: "/especialista/reportes", label: "Reportes y métricas" },
       { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
     );
   }
