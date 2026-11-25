@@ -31,6 +31,18 @@ export async function GET(_req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
   }
 
+  if (attachment.data) {
+    const mime = attachment.mimeType || MIME[attachment.fileUrl.split(".").pop()?.toLowerCase() || ""] || "application/octet-stream";
+    return new NextResponse(new Uint8Array(attachment.data), {
+      headers: {
+        "Content-Type": mime,
+        "Content-Disposition": `inline; filename="${attachment.fileName.replace(/"/g, "")}"`,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
+
   try {
     const diskPath = uploadDiskPath(attachment.fileUrl);
     const bytes = await readFile(diskPath);

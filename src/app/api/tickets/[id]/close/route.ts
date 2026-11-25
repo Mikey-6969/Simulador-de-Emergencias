@@ -9,6 +9,10 @@ const schema = z.object({
   activities: z.string().min(8).max(4000),
   diagnosis: z.string().min(8).max(4000),
   solution: z.string().min(8).max(4000),
+  images: z
+    .array(z.object({ fileName: z.string().max(120), dataUrl: z.string().max(3_800_000) }))
+    .max(4)
+    .optional(),
 });
 
 type Ctx = { params: Promise<{ id: string }> };

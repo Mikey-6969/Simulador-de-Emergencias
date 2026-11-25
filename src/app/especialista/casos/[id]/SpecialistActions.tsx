@@ -88,6 +88,7 @@ export function SpecialistActions({
   const [activities, setActivities] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [solution, setSolution] = useState("");
+  const [evidence, setEvidence] = useState<Array<{ fileName: string; dataUrl: string }>>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -95,6 +96,22 @@ export function SpecialistActions({
     () => assignments.find((a) => a.status === "ASIGNADA") || null,
     [assignments],
   );
+
+  async function onPickEvidence(files: FileList | null) {
+    if (!files?.length) return;
+    const next = [...evidence];
+    for (const file of Array.from(files).slice(0, 4 - next.length)) {
+      if (!file.type.startsWith("image/") || file.size > 2_000_000) continue;
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("read failed"));
+        reader.readAsDataURL(file);
+      });
+      next.push({ fileName: file.name, dataUrl });
+    }
+    setEvidence(next.slice(0, 4));
+  }
 
   async function run(path: string, body?: object) {
     setLoading(true);
@@ -387,6 +404,21 @@ export function SpecialistActions({
                 value={solution}
                 onChange={(e) => setSolution(e.target.value)}
               />
+              <label className="block space-y-1 text-sm">
+                <span>Evidencias fotográficas del cierre (opcional, máx. 4)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="mila-input"
+                  onChange={(e) => onPickEvidence(e.target.files)}
+                />
+              </label>
+              {evidence.length ? (
+                <p className="text-xs" style={{ color: "var(--muted)" }}>
+                  {evidence.length} imagen(es) lista(s): {evidence.map((e) => e.fileName).join(", ")}
+                </p>
+              ) : null}
               <button
                 className="mila-btn mila-btn-accent"
                 disabled={loading}
@@ -396,6 +428,7 @@ export function SpecialistActions({
                     activities,
                     diagnosis,
                     solution,
+                    images: evidence,
                   })
                 }
               >

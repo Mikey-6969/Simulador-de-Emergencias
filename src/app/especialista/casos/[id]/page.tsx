@@ -32,6 +32,11 @@ export default async function EspecialistaCasoPage({ params }: Props) {
         orderBy: { scheduledAt: "asc" },
       },
       closures: { orderBy: { createdAt: "desc" }, take: 3 },
+      attachments: {
+        where: { closureId: { not: null } },
+        select: { id: true, fileName: true, closureId: true },
+        orderBy: { createdAt: "asc" },
+      },
       timeline: { include: { actor: true }, orderBy: { createdAt: "asc" } },
     },
   });
@@ -110,6 +115,23 @@ export default async function EspecialistaCasoPage({ params }: Props) {
                 {ticket.closures[0].diagnosis}
               </p>
               <p className="mt-1">{ticket.closures[0].solution}</p>
+              {ticket.attachments.filter((a) => a.closureId === ticket.closures[0].id).length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {ticket.attachments
+                    .filter((a) => a.closureId === ticket.closures[0].id)
+                    .map((a) => (
+                      <a
+                        key={a.id}
+                        href={`/api/attachments/${a.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mila-chip"
+                      >
+                        Evidencia: {a.fileName}
+                      </a>
+                    ))}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </section>

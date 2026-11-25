@@ -183,7 +183,7 @@ def cover(
 ) -> None:
     for _ in range(2):
         doc.add_paragraph()
-    para(doc, "UNIVERSIDAD / ASIGNATURA", size=10, bold=True, color=SEA, center=True, after=2)
+    para(doc, "ASIGNATURA", size=10, bold=True, color=SEA, center=True, after=2)
     para(doc, "Diseño de Software II (TS5C)", size=12, color=MUTED, center=True, after=18)
     rule(doc)
     para(doc, eyebrow, size=11, bold=True, color=SEA, center=True, after=8)
@@ -432,11 +432,11 @@ def build_backlog() -> None:
         "PB-014": ("Hecho — Sprint 5", "Perfiles técnicos / zonas / capacidad."),
         "PB-015": ("Hecho — Sprint 5", "Recomendaciones con score zona/skills/carga."),
         "PB-016": ("Hecho — Sprint 5", "Asignación, notificación y bandeja del técnico."),
-        "PB-017": ("En curso — Sprint 6", "Visitas con capacidad y conflictos de agenda."),
-        "PB-018": ("En curso — Sprint 6", "Consulta de antecedentes/visitas/IA por técnico."),
-        "PB-019": ("En curso — Sprint 6", "Cierre con actividades, diagnóstico y solución."),
-        "PB-020": ("En curso — Sprint 6", "Outcomes RESUELTO/PENDIENTE/NUEVA_VISITA/ESCALADO."),
-        "PB-021": ("Pendiente — Sprint 6", "Evidencias post-visita / formato de cierre extendido."),
+        "PB-017": ("Hecho — Sprint 6", "Visitas con capacidad y conflictos de agenda."),
+        "PB-018": ("Hecho — Sprint 6", "Consulta de antecedentes/visitas/IA por técnico."),
+        "PB-019": ("Hecho — Sprint 6", "Cierre con actividades, diagnóstico y solución."),
+        "PB-020": ("Hecho — Sprint 6", "Outcomes RESUELTO/PENDIENTE/NUEVA_VISITA/ESCALADO."),
+        "PB-021": ("Hecho — Sprint 6", "Evidencias fotográficas en el cierre (hasta 4 imágenes)."),
         "PB-022": ("Parcial — Sprint 7", "Timeline en detalle; falta vista global avanzada."),
         "PB-023": ("Parcial — Sprint 7", "Webhook n8n + AutomationLog."),
         "PB-024": ("Parcial — Sprint 7", "IA en app; orquestación n8n opcional."),
@@ -447,7 +447,7 @@ def build_backlog() -> None:
         "PB-029": ("Hecho", "bcrypt, cookie httpOnly, CSRF, rate limits, secretos fuera del repo."),
         "PB-030": ("Parcial", "Pruebas de flujo/demo; suite formal pendiente."),
         "PB-031": ("Parcial", "Documentación n8n y plantilla de workflow."),
-        "PB-032": ("En curso", "App publicada; estabilizar secrets/seed y cierre académico."),
+        "PB-032": ("En curso", "Despliegue público permanente; estabilizar secretos/semilla y cierre académico."),
         "PB-033": ("Hecho", "Next.js + Prisma/PostgreSQL + n8n + agente IA."),
         "PB-034": ("Hecho", "Schema Prisma + DDL MySQL; Visit/Closure en Sprint 6."),
     }
@@ -494,7 +494,7 @@ def build_backlog() -> None:
         doc,
         eyebrow="PRODUCT BACKLOG — CORTE DE ESTADO",
         title="Backlog de producto actualizado",
-        subtitle="Sprint 5 entregado · Sprint 6 en curso · proyección Sprint 7",
+        subtitle="Sprint 5 y Sprint 6 entregados · proyección Sprint 7",
         meta_lines=[
             "Equipo 1",
             "Product Owner: Michael Andrés Perdomo Murcia",
@@ -517,7 +517,7 @@ def build_backlog() -> None:
             ["Solicitudes (S3)", "003–006", "Hecho", "Alta, adjuntos y consulta"],
             ["Agente IA (S4)", "007–011", "Hecho", "Incluye revisión humana"],
             ["Escalamiento (S5)", "012–016", "Hecho — entregado", "Ciclo hasta técnico asignado"],
-            ["Visitas / cierre (S6)", "017–021", "En curso", "017–020 embarcados; 021 pendiente"],
+            ["Visitas / cierre (S6)", "017–021", "Hecho — por aceptar", "Incluye evidencias de cierre (021)"],
             ["Trazab. / n8n / reportes (S7)", "022–028, 030", "Parcial / Pendiente", "Timeline, emit n8n, avisos in-app"],
         ],
         status_col=2,
@@ -551,10 +551,10 @@ def build_backlog() -> None:
         status_col=3,
     )
 
-    section_title(doc, "3.", "Sprint 6 — en curso")
+    section_title(doc, "3.", "Sprint 6 — entregado (por aceptar)")
     para(
         doc,
-        "Embarcado: visitas con control de agenda, atención en campo, cierre tipado, revisión IA y notificaciones in-app (rebanada). Pendiente principal: evidencias de cierre (PB-021).",
+        "Embarcado: visitas con control de agenda, atención en campo, cierre tipado con evidencias fotográficas, revisión de IA y notificaciones in-app (porción inicial). Pendiente: aceptación formal del Product Owner en la Sprint Review.",
         justify=True,
         after=8,
     )
@@ -562,11 +562,11 @@ def build_backlog() -> None:
         doc,
         ["ID", "Historia", "Pts", "Estado", "Avance"],
         [
-            ["PB-017", "Programar visita sin conflictos", "8", "En curso — Sprint 6", "API /visits + UI"],
-            ["PB-018", "Consultar antecedentes", "5", "En curso — Sprint 6", "Detalle técnico"],
-            ["PB-019", "Registrar actividades y solución", "8", "En curso — Sprint 6", "Closure + /close"],
-            ["PB-020", "Registrar resultado del servicio", "5", "En curso — Sprint 6", "ClosureOutcome"],
-            ["PB-021", "Evidencias / formato de cierre", "5", "Pendiente — Sprint 6", "Por abordar"],
+            ["PB-017", "Programar visita sin conflictos", "8", "Hecho — Sprint 6", "API /visits + UI"],
+            ["PB-018", "Consultar antecedentes", "5", "Hecho — Sprint 6", "Detalle técnico"],
+            ["PB-019", "Registrar actividades y solución", "8", "Hecho — Sprint 6", "Closure + /close"],
+            ["PB-020", "Registrar resultado del servicio", "5", "Hecho — Sprint 6", "ClosureOutcome"],
+            ["PB-021", "Evidencias / formato de cierre", "5", "Hecho — Sprint 6", "Attachment.closureId"],
         ],
         status_col=3,
     )

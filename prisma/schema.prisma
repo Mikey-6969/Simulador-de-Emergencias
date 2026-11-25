@@ -142,9 +142,14 @@ model Attachment {
   fileName   String
   fileUrl    String
   uploadedBy String?
+  closureId  String?
+  mimeType   String?
+  data       Bytes?
   createdAt  DateTime @default(now())
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([closureId])
 }
 
 model AiAnalysis {

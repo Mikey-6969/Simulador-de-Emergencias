@@ -1,4 +1,3 @@
-import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
@@ -11,10 +10,8 @@ export async function saveTicketImages(
   ticketId: string,
   uploadedBy: string,
   images: Array<{ fileName: string; dataUrl: string }>,
+  options?: { closureId?: string },
 ) {
-  const dir = path.join(process.cwd(), "storage", "uploads");
-  await mkdir(dir, { recursive: true });
-
   const saved: Array<{ id: string; fileUrl: string; fileName: string }> = [];
 
   for (const image of images.slice(0, MAX_IMAGES)) {
@@ -30,16 +27,16 @@ export async function saveTicketImages(
     const raw = image.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "evidencia";
     const safeBase = raw.replace(/\.[a-zA-Z0-9]+$/, "") || "evidencia";
     const storedName = `${ticketId}-${randomUUID()}-${safeBase}.${ext}`;
-    const diskPath = path.join(dir, storedName);
-    await writeFile(diskPath, buffer);
-
     const row = await prisma.attachment.create({
       data: {
         ticketId,
         fileName: image.fileName || storedName,
-        // Private authenticated route — never a public static path.
+        // Private authenticated route — bytes live in the database (serverless-safe).
         fileUrl: storedName,
         uploadedBy,
+        closureId: options?.closureId,
+        mimeType: mime,
+        data: buffer,
       },
     });
     saved.push({

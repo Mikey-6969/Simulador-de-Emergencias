@@ -487,6 +487,7 @@ export async function closeTicket(input: {
   activities: string;
   diagnosis: string;
   solution: string;
+  images?: Array<{ fileName: string; dataUrl: string }>;
 }) {
   const ticket = await prisma.ticket.findUniqueOrThrow({ where: { id: input.ticketId } });
   if (ticket.assigneeId !== input.actorId) {
@@ -506,6 +507,15 @@ export async function closeTicket(input: {
       solution: input.solution,
     },
   });
+
+  let evidenceCount = 0;
+  if (input.images?.length) {
+    const { saveTicketImages } = await import("./uploads");
+    const saved = await saveTicketImages(input.ticketId, input.actorId, input.images, {
+      closureId: closure.id,
+    });
+    evidenceCount = saved.length;
+  }
 
   const nextStatus: TicketStatus =
     input.outcome === "RESUELTO"
@@ -538,9 +548,9 @@ export async function closeTicket(input: {
   await addTimeline(
     input.ticketId,
     "CLOSED",
-    `Cierre registrado (${input.outcome}): ${input.solution.slice(0, 120)}`,
+    `Cierre registrado (${input.outcome}): ${input.solution.slice(0, 120)}${evidenceCount ? ` · ${evidenceCount} evidencia(s) fotográfica(s)` : ""}`,
     input.actorId,
-    { outcome: input.outcome, closureId: closure.id },
+    { outcome: input.outcome, closureId: closure.id, evidenceCount },
   );
 
   await emitN8nEvent("ticket.closed", {

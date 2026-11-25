@@ -4,7 +4,7 @@
 | Bloque | Estado |
 |---|---|
 | Sprint 5 (PB-012…016) | **Hecho — entregado** |
-| Sprint 6 (PB-017…021) | **En curso** (021 pendiente) |
+| Sprint 6 (PB-017…021) | **Hecho — por aceptar** (PO) |
 | Sprint 7 (trazabilidad/n8n/reportes) | Parcial / pendiente |
 
 ## Detalle
@@ -31,11 +31,11 @@
 | PB-014 | Sprint 5 | Hecho — Sprint 5 | CRUD de perfiles técnicos / zonas / capacidad. |
 | PB-015 | Sprint 5 | Hecho — Sprint 5 | Recomendaciones con score zona/skills/carga real. |
 | PB-016 | Sprint 5 | Hecho — Sprint 5 | Asignación confirmada, notificación y bandeja del técnico. |
-| PB-017 | Sprint 6 | En curso — Sprint 6 | Visitas con control de capacidad y conflictos de agenda. |
-| PB-018 | Sprint 6 | En curso — Sprint 6 | Técnico consulta detalle, antecedentes, visitas e IA. |
-| PB-019 | Sprint 6 | En curso — Sprint 6 | Cierre con actividades, diagnóstico y solución. |
-| PB-020 | Sprint 6 | En curso — Sprint 6 | Outcome RESUELTO/PENDIENTE/NUEVA_VISITA/ESCALADO. |
-| PB-021 | Sprint 6 | Pendiente — Sprint 6 | Falta adjuntar evidencias post-visita / formato de cierre extendido. |
+| PB-017 | Sprint 6 | Hecho — Sprint 6 | Visitas con control de capacidad y conflictos de agenda. |
+| PB-018 | Sprint 6 | Hecho — Sprint 6 | Técnico consulta detalle, antecedentes, visitas e IA. |
+| PB-019 | Sprint 6 | Hecho — Sprint 6 | Cierre con actividades, diagnóstico y solución. |
+| PB-020 | Sprint 6 | Hecho — Sprint 6 | Outcome RESUELTO/PENDIENTE/NUEVA_VISITA/ESCALADO. |
+| PB-021 | Sprint 6 | Hecho — Sprint 6 | Evidencias fotográficas (hasta 4) asociadas al cierre; almacenadas en BD. |
 | PB-022 | Sprint 7 | Parcial — Sprint 7 | Timeline en detalle de caso; falta vista global avanzada. |
 | PB-023 | Sprint 7 | Parcial — Sprint 7 | Emisión webhook n8n + AutomationLog; flujo rico pendiente. |
 | PB-024 | Sprint 7 | Parcial — Sprint 7 | IA en app; orquestación completa vía n8n opcional. |

@@ -1,4 +1,6 @@
-# MILA — Sprint 6 (en curso)
+# MILA — Sprint 6 (entregado, por aceptar)
+
+Plan formal: `docs/entrega-sprint6/`.
 
 ## Ya embarcado en la app
 
@@ -9,6 +11,7 @@
 | PB-019 | Registrar actividades / diagnóstico / solución | Cierre de técnico |
 | PB-020 | Resultado: resuelto / pendiente / nueva visita / escalado | `ClosureOutcome` |
 | PB-010 (gap) | Revisar análisis IA | Aceptar / modificar / rechazar |
+| PB-021 | Evidencias fotográficas en el cierre | BD + ruta autenticada |
 | PB-025 (slice) | Notificaciones in-app | Campana + API |
 
 ## Endpoints nuevos
@@ -27,6 +30,6 @@
 
 ## Siguiente
 
-- Evidencias de cierre (fotos post-visita)
+- ~~Evidencias de cierre (fotos post-visita)~~ — hecho (PB-021)
 - Agenda visual semanal del técnico
 - Publicar/redeploy app con schema nuevo
