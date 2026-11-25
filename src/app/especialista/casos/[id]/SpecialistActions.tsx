@@ -100,8 +100,10 @@ export function SpecialistActions({
   async function onPickEvidence(files: FileList | null) {
     if (!files?.length) return;
     const next = [...evidence];
+    let budget = 3_000_000 - next.reduce((n, e) => n + Math.floor(e.dataUrl.length * 0.75), 0);
     for (const file of Array.from(files).slice(0, 4 - next.length)) {
-      if (!file.type.startsWith("image/") || file.size > 2_000_000) continue;
+      if (!file.type.startsWith("image/") || file.size > 2_000_000 || file.size > budget) continue;
+      budget -= file.size;
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(String(reader.result));
