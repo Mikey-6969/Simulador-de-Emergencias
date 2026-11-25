@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AppShell } from "@/components/AppShell";
+import { specialistNav } from "@/lib/nav";
 import { PriorityChip, StatusChip } from "@/components/StatusChip";
 import { zoneLabel } from "@/lib/labels";
 
@@ -30,27 +31,13 @@ export default async function EspecialistaPage({
   const open = tickets.filter((t) => !["CERRADA", "CANCELADA"].includes(t.status)).length;
   const escaladas = tickets.filter((t) => t.status === "ESCALADA").length;
   const asignadas = tickets.filter((t) => t.status === "ASIGNADA").length;
-  const canManage = ["COORDINADOR", "ADMIN"].includes(session.role);
 
   return (
     <AppShell
       brand="Portal Especialista"
       subtitle="Bandeja y asignación"
       userName={session.name}
-      nav={[
-        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
-        { href: "/especialista?vista=mios", label: "Asignados a mí" },
-        { href: "/especialista/nuevo", label: "Crear caso" },
-        ...(canManage
-          ? [
-              { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
-              { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
-            ]
-          : []),
-        ...(session.role === "ADMIN"
-          ? [{ href: "/especialista/usuarios", label: "Usuarios (BD)", section: "Admin" }]
-          : []),
-      ]}
+      nav={specialistNav(session.role)}
       actions={
         <>
           <Link href="/especialista/nuevo" className="mila-btn mila-btn-primary">

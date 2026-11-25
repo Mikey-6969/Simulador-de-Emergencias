@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Role, TicketStatus } from "@prisma/client";
+import { formatDateTime } from "@/lib/time";
 
 type Assignment = {
   id: string;
@@ -21,6 +22,7 @@ type Tech = {
 
 type Visit = {
   id: string;
+  windowMinutes: number;
   scheduledAt: string;
   status: string;
   address: string | null;
@@ -88,6 +90,12 @@ export function SpecialistActions({
   const [activities, setActivities] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [solution, setSolution] = useState("");
+  const [timeSpent, setTimeSpent] = useState("");
+  const [partsUsed, setPartsUsed] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [receivedBy, setReceivedBy] = useState("");
+  const [customerConfirmed, setCustomerConfirmed] = useState(false);
+  const [reschedule, setReschedule] = useState<Record<string, string>>({});
   const [evidence, setEvidence] = useState<Array<{ fileName: string; dataUrl: string }>>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -115,11 +123,11 @@ export function SpecialistActions({
     setEvidence(next.slice(0, 4));
   }
 
-  async function run(path: string, body?: object) {
+  async function run(path: string, body?: object, method = "POST") {
     setLoading(true);
     setMessage("");
     const res = await fetch(path, {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -406,6 +414,42 @@ export function SpecialistActions({
                 value={solution}
                 onChange={(e) => setSolution(e.target.value)}
               />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  className="mila-input"
+                  type="number"
+                  min={1}
+                  placeholder="Tiempo empleado (min)"
+                  value={timeSpent}
+                  onChange={(e) => setTimeSpent(e.target.value)}
+                />
+                <input
+                  className="mila-input"
+                  placeholder="Recibido por (cliente)"
+                  value={receivedBy}
+                  onChange={(e) => setReceivedBy(e.target.value)}
+                />
+              </div>
+              <textarea
+                className="mila-textarea"
+                placeholder="Repuestos / materiales utilizados (opcional)"
+                value={partsUsed}
+                onChange={(e) => setPartsUsed(e.target.value)}
+              />
+              <textarea
+                className="mila-textarea"
+                placeholder="Recomendaciones de seguimiento (opcional)"
+                value={recommendations}
+                onChange={(e) => setRecommendations(e.target.value)}
+              />
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={customerConfirmed}
+                  onChange={(e) => setCustomerConfirmed(e.target.checked)}
+                />
+                El cliente confirma conformidad con el servicio
+              </label>
               <label className="block space-y-1 text-sm">
                 <span>Evidencias fotográficas del cierre (opcional, máx. 4)</span>
                 <input
@@ -430,6 +474,11 @@ export function SpecialistActions({
                     activities,
                     diagnosis,
                     solution,
+                    timeSpentMinutes: timeSpent ? Number(timeSpent) : undefined,
+                    partsUsed: partsUsed || undefined,
+                    recommendations: recommendations || undefined,
+                    receivedBy: receivedBy || undefined,
+                    customerConfirmed,
                     images: evidence,
                   })
                 }
@@ -452,13 +501,50 @@ export function SpecialistActions({
             {visits.map((v) => (
               <li key={v.id} className="rounded-xl bg-black/20 px-3 py-2">
                 <div className="font-medium">
-                  {new Date(v.scheduledAt).toLocaleString("es-CO")} · {v.status}
+                  {formatDateTime(v.scheduledAt)} · {v.status}
                 </div>
                 <div style={{ color: "var(--muted)" }}>
                   {v.technicianName}
                   {v.address ? ` · ${v.address}` : ""}
                   {v.notes ? ` · ${v.notes}` : ""}
                 </div>
+                {canManage && ["PROGRAMADA", "EN_CURSO"].includes(v.status) ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <input
+                      type="datetime-local"
+                      className="mila-input max-w-[210px]"
+                      value={reschedule[v.id] || ""}
+                      onChange={(e) =>
+                        setReschedule((prev) => ({ ...prev, [v.id]: e.target.value }))
+                      }
+                    />
+                    <button
+                      className="mila-btn mila-btn-ghost"
+                      disabled={loading || !reschedule[v.id]}
+                      onClick={() =>
+                        run(
+                          `/api/visits/${v.id}`,
+                          {
+                            action: "reschedule",
+                            scheduledAt: new Date(reschedule[v.id]).toISOString(),
+                          },
+                          "PATCH",
+                        )
+                      }
+                    >
+                      Reprogramar
+                    </button>
+                    <button
+                      className="mila-btn mila-btn-ghost"
+                      disabled={loading}
+                      onClick={() =>
+                        run(`/api/visits/${v.id}`, { action: "cancel" }, "PATCH")
+                      }
+                    >
+                      Cancelar visita
+                    </button>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AppShell } from "@/components/AppShell";
+import { specialistNav } from "@/lib/nav";
+import { formatDateTime } from "@/lib/time";
 
 export default async function AutomatizacionPage() {
   const session = await getSession();
@@ -22,13 +24,7 @@ export default async function AutomatizacionPage() {
       brand="Portal Especialista"
       subtitle="Automatización"
       userName={session.name}
-      nav={[
-        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
-        { href: "/especialista?vista=mios", label: "Asignados a mí" },
-        { href: "/especialista/nuevo", label: "Crear caso" },
-        { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
-        { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
-      ]}
+      nav={specialistNav(session.role)}
       actions={
         <Link href="/especialista" className="mila-btn mila-btn-ghost">
           Bandeja
@@ -76,7 +72,7 @@ export default async function AutomatizacionPage() {
                   </span>
                 </div>
                 <div className="mt-1" style={{ color: "var(--muted)" }}>
-                  {new Date(log.createdAt).toLocaleString("es-CO")}
+                  {formatDateTime(log.createdAt)}
                 </div>
                 {log.error ? <p className="mt-2 text-[#ffb4b4]">{log.error}</p> : null}
                 {log.response ? (

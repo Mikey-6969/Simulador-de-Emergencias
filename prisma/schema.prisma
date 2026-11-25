@@ -262,6 +262,11 @@ model Closure {
   activities  String         @db.Text
   diagnosis   String         @db.Text
   solution    String         @db.Text
+  timeSpentMinutes   Int?
+  partsUsed          String?  @db.Text
+  recommendations    String?  @db.Text
+  receivedBy         String?
+  customerConfirmed  Boolean  @default(false)
   createdAt   DateTime       @default(now())
 
   ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)

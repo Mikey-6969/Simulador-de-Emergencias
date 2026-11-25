@@ -52,6 +52,19 @@ export default async function EspecialistaCasoPage({ params }: Props) {
     ticket.assignments.find((a) => a.status === "ASIGNADA")?.technician ||
     null;
   const latestAi = ticket.aiAnalyses[0] || null;
+  const history = await prisma.ticket.findMany({
+    where: { customerId: ticket.customerId, id: { not: ticket.id } },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    select: {
+      id: true,
+      number: true,
+      title: true,
+      status: true,
+      createdAt: true,
+      closures: { orderBy: { createdAt: "desc" }, take: 1, select: { solution: true, outcome: true } },
+    },
+  });
 
   return (
     <main className="mila-shell py-8">
@@ -107,6 +120,25 @@ export default async function EspecialistaCasoPage({ params }: Props) {
             </div>
           ) : null}
 
+          {history.length ? (
+            <div className="rounded-2xl border border-[var(--line)] p-4 text-sm">
+              <h3 className="mb-2 font-semibold">Antecedentes del cliente</h3>
+              <ul className="space-y-2">
+                {history.map((h) => (
+                  <li key={h.id}>
+                    <Link href={`/especialista/casos/${h.id}`} className="font-medium underline">
+                      {h.number}
+                    </Link>{" "}
+                    · {h.title} · {h.status}
+                    {h.closures[0] ? (
+                      <span style={{ color: "var(--muted)" }}> — {h.closures[0].solution.slice(0, 90)}</span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {ticket.closures[0] ? (
             <div className="rounded-2xl border border-[var(--line)] p-4 text-sm">
               <h3 className="mb-2 font-semibold">Último cierre</h3>
@@ -115,6 +147,29 @@ export default async function EspecialistaCasoPage({ params }: Props) {
                 {ticket.closures[0].diagnosis}
               </p>
               <p className="mt-1">{ticket.closures[0].solution}</p>
+              <dl className="mt-3 grid gap-1 text-xs" style={{ color: "var(--muted)" }}>
+                {ticket.closures[0].timeSpentMinutes ? (
+                  <div>Tiempo empleado: {ticket.closures[0].timeSpentMinutes} min</div>
+                ) : null}
+                {ticket.closures[0].partsUsed ? (
+                  <div>Repuestos: {ticket.closures[0].partsUsed}</div>
+                ) : null}
+                {ticket.closures[0].recommendations ? (
+                  <div>Recomendaciones: {ticket.closures[0].recommendations}</div>
+                ) : null}
+                {ticket.closures[0].receivedBy ? (
+                  <div>
+                    Recibido por: {ticket.closures[0].receivedBy}
+                    {ticket.closures[0].customerConfirmed ? " (conforme)" : ""}
+                  </div>
+                ) : null}
+              </dl>
+              <Link
+                href={`/especialista/casos/${ticket.id}/cierre`}
+                className="mila-btn mila-btn-ghost mt-3 inline-block"
+              >
+                Ver formato de cierre
+              </Link>
               {ticket.attachments.filter((a) => a.closureId === ticket.closures[0].id).length ? (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {ticket.attachments
@@ -157,6 +212,7 @@ export default async function EspecialistaCasoPage({ params }: Props) {
             }))}
             visits={ticket.visits.map((v) => ({
               id: v.id,
+              windowMinutes: v.windowMinutes,
               scheduledAt: v.scheduledAt.toISOString(),
               status: v.status,
               address: v.address,

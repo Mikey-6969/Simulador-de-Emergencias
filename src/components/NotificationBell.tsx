@@ -26,9 +26,12 @@ export function NotificationBell() {
   }
 
   useEffect(() => {
-    load();
+    const first = window.setTimeout(load, 0);
     const id = window.setInterval(load, 45_000);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(id);
+    };
   }, []);
 
   async function markAll() {

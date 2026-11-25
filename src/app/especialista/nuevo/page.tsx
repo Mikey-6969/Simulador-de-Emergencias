@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/AppShell";
+import { specialistNav } from "@/lib/nav";
 import { SpecialistNewCaseForm } from "./SpecialistNewCaseForm";
 
 export default async function EspecialistaNuevoPage() {
@@ -9,24 +10,13 @@ export default async function EspecialistaNuevoPage() {
   if (!session) redirect("/login");
   if (session.role === "CLIENTE") redirect("/cliente");
 
-  const canManage = ["COORDINADOR", "ADMIN"].includes(session.role);
 
   return (
     <AppShell
       brand="Portal Especialista"
       subtitle="Crear caso"
       userName={session.name}
-      nav={[
-        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
-        { href: "/especialista?vista=mios", label: "Asignados a mí" },
-        { href: "/especialista/nuevo", label: "Crear caso" },
-        ...(canManage
-          ? [
-              { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
-              { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
-            ]
-          : []),
-      ]}
+      nav={specialistNav(session.role)}
       actions={
         <Link href="/especialista" className="mila-btn mila-btn-ghost">
           Ir al listado

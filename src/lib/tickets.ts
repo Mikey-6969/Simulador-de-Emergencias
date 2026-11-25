@@ -11,6 +11,7 @@ import {
 import { prisma } from "./db";
 import { analyzeTicket } from "./ai";
 import { emitN8nEvent } from "./n8n";
+import { addDays, formatDateTime, startOfBogotaDay } from "./time";
 
 async function nextTicketNumber() {
   const year = new Date().getFullYear();
@@ -339,6 +340,43 @@ function windowsOverlap(
   return aStart.getTime() < bEnd && bStart.getTime() < aEnd;
 }
 
+async function assertVisitSlot(
+  profile: { id: string; capacityPerDay: number },
+  scheduledAt: Date,
+  windowMinutes: number,
+  excludeVisitId?: string,
+) {
+  if (scheduledAt.getTime() < Date.now() - 60_000) {
+    throw new Error("No se puede programar una visita en el pasado.");
+  }
+  const dayStart = startOfBogotaDay(scheduledAt);
+  const dayEnd = addDays(dayStart, 1);
+
+  const dayVisits = await prisma.visit.findMany({
+    where: {
+      technicianProfileId: profile.id,
+      status: { in: ["PROGRAMADA", "EN_CURSO"] },
+      scheduledAt: { gte: dayStart, lt: dayEnd },
+      ...(excludeVisitId ? { id: { not: excludeVisitId } } : {}),
+    },
+  });
+
+  if (dayVisits.length >= profile.capacityPerDay) {
+    throw new Error(
+      `El técnico ya tiene ${dayVisits.length}/${profile.capacityPerDay} visitas ese día.`,
+    );
+  }
+
+  const conflict = dayVisits.find((v) =>
+    windowsOverlap(v.scheduledAt, v.windowMinutes, scheduledAt, windowMinutes),
+  );
+  if (conflict) {
+    throw new Error(
+      `Conflicto de agenda: ya hay visita a las ${formatDateTime(conflict.scheduledAt)}.`,
+    );
+  }
+}
+
 export async function scheduleVisit(input: {
   ticketId: string;
   technicianProfileId: string;
@@ -365,33 +403,7 @@ export async function scheduleVisit(input: {
   }
 
   const windowMinutes = input.windowMinutes ?? 120;
-  const dayStart = new Date(input.scheduledAt);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
-
-  const dayVisits = await prisma.visit.findMany({
-    where: {
-      technicianProfileId: profile.id,
-      status: { in: ["PROGRAMADA", "EN_CURSO"] },
-      scheduledAt: { gte: dayStart, lt: dayEnd },
-    },
-  });
-
-  if (dayVisits.length >= profile.capacityPerDay) {
-    throw new Error(
-      `El técnico ya tiene ${dayVisits.length}/${profile.capacityPerDay} visitas ese día.`,
-    );
-  }
-
-  const conflict = dayVisits.find((v) =>
-    windowsOverlap(v.scheduledAt, v.windowMinutes, input.scheduledAt, windowMinutes),
-  );
-  if (conflict) {
-    throw new Error(
-      `Conflicto de agenda: ya hay visita a las ${conflict.scheduledAt.toLocaleString("es-CO")}.`,
-    );
-  }
+  await assertVisitSlot(profile, input.scheduledAt, windowMinutes);
 
   const visit = await prisma.visit.create({
     data: {
@@ -414,7 +426,7 @@ export async function scheduleVisit(input: {
   await addTimeline(
     ticket.id,
     "VISIT_SCHEDULED",
-    `Visita programada para ${input.scheduledAt.toLocaleString("es-CO")} · ${profile.user.name}`,
+    `Visita programada para ${formatDateTime(input.scheduledAt)} · ${profile.user.name}`,
     input.actorId,
     { visitId: visit.id, scheduledAt: input.scheduledAt.toISOString() },
   );
@@ -434,7 +446,7 @@ export async function scheduleVisit(input: {
       userId: profile.userId,
       ticketId: ticket.id,
       title: "Visita programada",
-      body: `Tienes visita para el caso ${ticket.number} el ${input.scheduledAt.toLocaleString("es-CO")}.`,
+      body: `Tienes visita para el caso ${ticket.number} el ${formatDateTime(input.scheduledAt)}.`,
     },
   });
 
@@ -450,6 +462,84 @@ export async function scheduleVisit(input: {
   }
 
   return visit;
+}
+
+export async function updateVisit(input: {
+  visitId: string;
+  actorId: string;
+  action: "cancel" | "reschedule";
+  scheduledAt?: Date;
+  windowMinutes?: number;
+  reason?: string;
+}) {
+  const visit = await prisma.visit.findUniqueOrThrow({
+    where: { id: input.visitId },
+    include: { ticket: true, technician: { include: { user: true } } },
+  });
+  if (!["PROGRAMADA", "EN_CURSO"].includes(visit.status)) {
+    throw new Error("Solo se pueden modificar visitas programadas o en curso.");
+  }
+
+  if (input.action === "cancel") {
+    await prisma.visit.update({ where: { id: visit.id }, data: { status: "CANCELADA" } });
+    const remaining = await prisma.visit.count({
+      where: { ticketId: visit.ticketId, status: { in: ["PROGRAMADA", "EN_CURSO"] }, id: { not: visit.id } },
+    });
+    if (!remaining && visit.ticket.status === "VISITA_PROGRAMADA") {
+      await prisma.ticket.update({ where: { id: visit.ticketId }, data: { status: "ASIGNADA" } });
+    }
+    await addTimeline(
+      visit.ticketId,
+      "VISIT_CANCELLED",
+      `Visita del ${formatDateTime(visit.scheduledAt)} cancelada${input.reason ? `: ${input.reason}` : ""}.`,
+      input.actorId,
+      { visitId: visit.id },
+    );
+    await emitN8nEvent("ticket.visit_cancelled", {
+      ticketId: visit.ticketId,
+      number: visit.ticket.number,
+      visitId: visit.id,
+    });
+    await prisma.notification.create({
+      data: {
+        userId: visit.technician.userId,
+        ticketId: visit.ticketId,
+        title: "Visita cancelada",
+        body: `Se canceló la visita del caso ${visit.ticket.number} (${formatDateTime(visit.scheduledAt)}).`,
+      },
+    });
+    return { visitId: visit.id, status: "CANCELADA" as const };
+  }
+
+  if (!input.scheduledAt) throw new Error("Indica la nueva fecha y hora.");
+  const windowMinutes = input.windowMinutes ?? visit.windowMinutes;
+  await assertVisitSlot(visit.technician, input.scheduledAt, windowMinutes, visit.id);
+  const updated = await prisma.visit.update({
+    where: { id: visit.id },
+    data: { scheduledAt: input.scheduledAt, windowMinutes },
+  });
+  await addTimeline(
+    visit.ticketId,
+    "VISIT_RESCHEDULED",
+    `Visita reprogramada: ${formatDateTime(visit.scheduledAt)} → ${formatDateTime(input.scheduledAt)}.`,
+    input.actorId,
+    { visitId: visit.id },
+  );
+  await emitN8nEvent("ticket.visit_rescheduled", {
+    ticketId: visit.ticketId,
+    number: visit.ticket.number,
+    visitId: visit.id,
+    scheduledAt: input.scheduledAt.toISOString(),
+  });
+  await prisma.notification.create({
+    data: {
+      userId: visit.technician.userId,
+      ticketId: visit.ticketId,
+      title: "Visita reprogramada",
+      body: `Caso ${visit.ticket.number}: nueva fecha ${formatDateTime(input.scheduledAt)}.`,
+    },
+  });
+  return { visitId: updated.id, status: updated.status };
 }
 
 export async function startAttention(ticketId: string, actorId: string) {
@@ -487,6 +577,11 @@ export async function closeTicket(input: {
   activities: string;
   diagnosis: string;
   solution: string;
+  timeSpentMinutes?: number;
+  partsUsed?: string;
+  recommendations?: string;
+  receivedBy?: string;
+  customerConfirmed?: boolean;
   images?: Array<{ fileName: string; dataUrl: string }>;
 }) {
   const ticket = await prisma.ticket.findUniqueOrThrow({ where: { id: input.ticketId } });
@@ -505,6 +600,11 @@ export async function closeTicket(input: {
       activities: input.activities,
       diagnosis: input.diagnosis,
       solution: input.solution,
+      timeSpentMinutes: input.timeSpentMinutes,
+      partsUsed: input.partsUsed || null,
+      recommendations: input.recommendations || null,
+      receivedBy: input.receivedBy || null,
+      customerConfirmed: Boolean(input.customerConfirmed),
     },
   });
 

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AppShell } from "@/components/AppShell";
+import { specialistNav } from "@/lib/nav";
 import { NewTechnicianForm } from "./NewTechnicianForm";
 
 export default async function TecnicosPage() {
@@ -20,13 +21,7 @@ export default async function TecnicosPage() {
       brand="Portal Especialista"
       subtitle="Técnicos y zonas"
       userName={session.name}
-      nav={[
-        { href: "/especialista", label: "Casos abiertos", section: "Casos" },
-        { href: "/especialista?vista=mios", label: "Asignados a mí" },
-        { href: "/especialista/nuevo", label: "Crear caso" },
-        { href: "/especialista/tecnicos", label: "Técnicos / zonas", section: "Operación" },
-        { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
-      ]}
+      nav={specialistNav(session.role)}
       actions={
         <Link href="/especialista" className="mila-btn mila-btn-ghost">
           Bandeja

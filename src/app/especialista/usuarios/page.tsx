@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AppShell } from "@/components/AppShell";
+import { specialistNav } from "@/lib/nav";
 import { SeedDemoButton } from "./SeedDemoButton";
 import { UserAdminPanel } from "./UserAdminPanel";
 
@@ -32,12 +33,7 @@ export default async function UsuariosAdminPage() {
       brand="Administración"
       subtitle="Usuarios en esta base"
       userName={session.name}
-      nav={[
-        { href: "/especialista", label: "Bandeja", section: "Casos" },
-        { href: "/especialista/usuarios", label: "Usuarios", section: "Admin" },
-        { href: "/especialista/tecnicos", label: "Técnicos / zonas" },
-        { href: "/especialista/automatizacion", label: "Logs n8n / IA" },
-      ]}
+      nav={specialistNav(session.role)}
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
