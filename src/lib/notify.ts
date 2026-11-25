@@ -80,7 +80,7 @@ async function logExternal(
   });
 }
 
-async function loadCaseInfo(ticketId: string | null | undefined): Promise<CaseInfo | null> {
+export async function loadCaseInfo(ticketId: string | null | undefined): Promise<CaseInfo | null> {
   if (!ticketId) return null;
   const t = await prisma.ticket.findUnique({
     where: { id: ticketId },

@@ -6,6 +6,8 @@ import { canAccessTicket } from "@/lib/tickets";
 import { LogoutButton } from "@/components/LogoutButton";
 import { PriorityChip, StatusChip } from "@/components/StatusChip";
 import { zoneLabel } from "@/lib/labels";
+import { loadCaseInfo } from "@/lib/notify";
+import { normalizePhone, renderWhatsApp, whatsappClickToChatUrl } from "@/lib/channels";
 import { SpecialistActions } from "./SpecialistActions";
 
 type Props = { params: Promise<{ id: string }> };
@@ -66,6 +68,41 @@ export default async function EspecialistaCasoPage({ params }: Props) {
     },
   });
 
+  const caso = await loadCaseInfo(ticket.id);
+  const waTargets = [
+    {
+      key: "cliente",
+      label: "Avisar al cliente",
+      name: ticket.customer.name,
+      phone: normalizePhone(ticket.customer.phone),
+      title: ticket.status === "CERRADA" ? "Caso cerrado" : "Estado de tu caso",
+      body:
+        ticket.status === "CERRADA"
+          ? `tu caso ${ticket.number} fue cerrado.`
+          : `te compartimos el estado de tu caso ${ticket.number}.`,
+    },
+    ...(ticket.assignee
+      ? [
+          {
+            key: "tecnico",
+            label: "Avisar al técnico",
+            name: ticket.assignee.name,
+            phone: normalizePhone(ticket.assignee.phone),
+            title: "Caso asignado",
+            body: `se te asignó el caso ${ticket.number}.`,
+          },
+        ]
+      : []),
+  ].map((t) => ({
+    ...t,
+    href: t.phone
+      ? whatsappClickToChatUrl(
+          t.phone,
+          renderWhatsApp({ recipientName: t.name, title: t.title, body: t.body, caso }),
+        )
+      : null,
+  }));
+
   return (
     <main className="mila-shell py-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -94,6 +131,32 @@ export default async function EspecialistaCasoPage({ params }: Props) {
             <p>Servicio: {ticket.serviceType}</p>
             <p>Correo: {ticket.customer.email}</p>
             <p>Técnico: {ticket.assignee?.name || "Sin asignar"}</p>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--line)] p-4 text-sm">
+            <h3 className="mb-2 font-semibold">Notificar por WhatsApp</h3>
+            <p className="mb-3 text-xs" style={{ color: "var(--muted)" }}>
+              Abre WhatsApp con el mensaje del caso ya escrito; solo falta pulsar enviar.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {waTargets.map((t) =>
+                t.href ? (
+                  <a
+                    key={t.key}
+                    href={t.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mila-btn mila-btn-primary"
+                  >
+                    {t.label} · {t.name}
+                  </a>
+                ) : (
+                  <span key={t.key} className="mila-chip">
+                    {t.label}: sin celular registrado
+                  </span>
+                ),
+              )}
+            </div>
           </div>
 
           {latestAi ? (
