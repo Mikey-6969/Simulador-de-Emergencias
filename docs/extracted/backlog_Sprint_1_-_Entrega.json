@@ -1,0 +1,72 @@
+[
+  [
+    "ID",
+    "Entregable",
+    "Resultado esperado",
+    "Estado",
+    "Evidencia"
+  ],
+  [
+    "S1-01",
+    "Análisis del problema",
+    "Problema, objetivo y alcance documentados",
+    "Finalizado",
+    "Documento de planteamiento"
+  ],
+  [
+    "S1-02",
+    "Actores",
+    "Cliente, técnico, coordinador/administrador y empresa identificados",
+    "Finalizado",
+    "Mapa de actores"
+  ],
+  [
+    "S1-03",
+    "RF",
+    "Requerimientos funcionales levantados y priorizados",
+    "Finalizado",
+    "Documento de requerimientos"
+  ],
+  [
+    "S1-04",
+    "RNF",
+    "Seguridad, usabilidad, rendimiento, privacidad, integridad, etc.",
+    "Finalizado",
+    "Documento de requerimientos"
+  ],
+  [
+    "S1-05",
+    "Historias de usuario",
+    "Historias derivadas de requerimientos prioritarios",
+    "Finalizado",
+    "Backlog"
+  ],
+  [
+    "S1-06",
+    "Criterios de aceptación",
+    "Criterios verificables para historias prioritarias",
+    "Finalizado",
+    "Backlog / criterios"
+  ],
+  [
+    "S1-07",
+    "Product Backlog",
+    "Trabajo total identificado para completar el proyecto",
+    "Finalizado",
+    "Hoja Product Backlog"
+  ],
+  [
+    "S1-08",
+    "Priorización",
+    "Must/Should y Story Points iniciales",
+    "Finalizado",
+    "Backlog priorizado"
+  ],
+  [
+    "S1-09",
+    "Roadmap",
+    "Plan preliminar de Sprints posteriores y 13 semanas",
+    "Finalizado",
+    "Roadmap"
+  ]
+]

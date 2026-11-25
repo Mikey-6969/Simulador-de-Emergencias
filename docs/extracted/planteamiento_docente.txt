@@ -1,0 +1,334 @@
+PROYECTO DE DESARROLLO DE SOFTWARE 
+Plataforma Inteligente para la Gestión de Soporte Técnico 
+Documento de planteamiento del cliente y lineamientos del docente 
+Este documento está dividido en dos partes. La primera presenta la necesidad desde la perspectiva del 
+cliente. La segunda establece los lineamientos académicos, metodológicos y de ejecución definidos por el 
+docente para el desarrollo del proyecto. 
+PARTE I. PLANTEAMIENTO DEL PROYECTO DESDE LA PERSPECTIVA DEL CLIENTE 
+1. Visión del cliente 
+ 
+Actualmente represento a una empresa que presta servicios de soporte técnico a diferentes clientes 
+ubicados en varias zonas de Bogotá. 
+ 
+Nuestra empresa cuenta con un grupo de técnicos que se desplazan hasta las instalaciones de los 
+clientes cuando se presenta algún problema que requiere atención presencial. Actualmente tenemos 
+técnicos distribuidos para atender diferentes sectores de la ciudad y cada uno cuenta con determinadas 
+capacidades y conocimientos técnicos. 
+Sin embargo, actualmente tenemos varios problemas en la forma en que recibimos, gestionamos y 
+atendemos las solicitudes de soporte. 
+ 
+Cuando un usuario presenta un inconveniente técnico, normalmente se comunica con nuestra empresa y 
+explica su problema. En muchos casos, la información que recibimos no es completamente clara. Algunos 
+usuarios describen el problema de manera muy general, otros informan varios inconvenientes en una 
+misma solicitud y, en algunas ocasiones, se solicita inmediatamente la visita de un técnico sin haber 
+intentado resolver el problema de manera remota. 
+Esto genera una dificultad importante para nosotros, porque enviar un técnico hasta la ubicación de un 
+cliente representa tiempo, costos y disponibilidad de recursos. 
+ 
+Nos gustaría que, antes de enviar un técnico, existiera un mecanismo que pudiera analizar inicialmente el 
+problema reportado por el usuario e intentar orientarlo para encontrar una posible solución. 
+La idea es que el usuario pueda explicar su inconveniente utilizando sus propias palabras y que el sistema 
+sea capaz de interpretar la situación. Dependiendo del problema, el usuario debería recibir orientación o 
+recomendaciones que le permitan intentar solucionar el inconveniente. 
+ 
+Sin embargo, entendemos que no todos los problemas pueden resolverse de manera remota. 
+Por esta razón, necesitamos que, cuando después de varios intentos el problema continúe sin resolverse, 
+el caso pueda ser escalado para recibir atención presencial. 
+ 
+Uno de nuestros principales problemas actuales es precisamente determinar cuándo realmente es 
+necesario enviar un técnico a la ubicación del cliente. 
+
+No queremos que todas las solicitudes generen automáticamente una visita presencial, pero tampoco 
+queremos que un usuario que realmente necesita ayuda permanezca demasiado tiempo intentando 
+resolver un problema sin obtener una solución. 
+ 
+Cuando se determine que un caso necesita atención presencial, debemos poder identificar qué tipo de 
+soporte requiere el incidente y qué técnico podría ser el más adecuado para atenderlo. 
+Nuestra empresa trabaja con técnicos que atienden diferentes zonas de Bogotá, por lo que es importante 
+tener en cuenta la ubicación donde se encuentra el cliente. 
+ 
+Actualmente tenemos técnicos asociados a diferentes sectores de la ciudad, por ejemplo: 
+• Zona Norte. 
+• Zona Sur. 
+• Zona Oriente. 
+• Zona Occidente. 
+Además, los técnicos pueden tener diferentes niveles de disponibilidad, servicios asignados y horarios. 
+ 
+Por esta razón, no es suficiente seleccionar cualquier técnico. 
+ 
+Necesitamos que, cuando sea necesario programar una visita, el sistema pueda considerar información 
+relacionada con: 
+• La ubicación donde se encuentra el cliente. 
+• El tipo de problema reportado. 
+• Las características del servicio requerido. 
+• Los técnicos disponibles. 
+• La zona de atención. 
+• La disponibilidad de cada técnico. 
+• Los servicios que ya tiene programados. 
+Nuestro objetivo es mejorar la distribución de los servicios y evitar que la asignación de técnicos dependa 
+únicamente de decisiones manuales. 
+ 
+Una vez que un técnico recibe un servicio asignado, este debe poder consultar la información necesaria 
+para realizar la visita. 
+ 
+Después de atender el caso, necesitamos que exista un proceso formal para registrar el resultado de la 
+visita. 
+Actualmente tenemos dificultades con la trazabilidad de los servicios, porque en algunos casos sabemos 
+que un técnico visitó al cliente, pero posteriormente resulta difícil encontrar toda la información relacionada 
+con lo que ocurrió durante la atención. 
+ 
+Por esta razón, para nosotros es importante contar con un soporte formal del cierre de cada visita. 
+Al finalizar la atención, el técnico deberá registrar la información correspondiente a la visita y diligenciar un 
+formato establecido por la empresa que permita dejar evidencia del servicio realizado. 
+ 
+
+Este documento deberá conservarse como soporte del servicio, quedar relacionado con la información 
+original de la solicitud y permitir su posterior consulta. 
+Para nosotros es muy importante poder consultar posteriormente toda la historia de un caso. 
+ 
+Por ejemplo, deberíamos poder conocer: 
+• Cuándo fue reportado el problema. 
+• Qué información proporcionó inicialmente el usuario. 
+• Qué acciones se realizaron antes de enviar un técnico. 
+• Qué interacciones o recomendaciones se realizaron durante el intento de solución remota. 
+• Cuándo se decidió escalar el caso. 
+• Qué técnico fue asignado. 
+• Cuándo se realizó la visita. 
+• Qué actividades se realizaron. 
+• Cuál fue el resultado final. 
+• Qué documento soporta el cierre del servicio. 
+También necesitamos contar con información consolidada que nos permita analizar nuestra operación. 
+ 
+Actualmente tenemos muchos datos distribuidos en diferentes lugares y es difícil obtener información para 
+tomar decisiones. 
+ 
+Nos gustaría poder analizar aspectos como: 
+• Cantidad de solicitudes recibidas. 
+• Cantidad de problemas resueltos sin necesidad de una visita presencial. 
+• Cantidad de servicios que requirieron desplazamiento de un técnico. 
+• Solicitudes por zona. 
+• Técnicos con mayor número de servicios. 
+• Tipos de problemas más frecuentes. 
+• Servicios pendientes. 
+• Servicios cerrados. 
+• Tiempos de atención. 
+• Información histórica de las visitas. 
+Consideramos que esta información sería muy importante para mejorar la toma de decisiones dentro de la 
+empresa. 
+ 
+Finalmente, queremos que la comunicación con nuestros clientes sea clara y adecuada durante todo el 
+proceso. 
+ 
+El cliente debería recibir información relacionada con el estado de su solicitud y saber qué está ocurriendo 
+con su caso. 
+ 
+De igual manera, una vez finalizado un servicio, debería existir una comunicación que informe 
+adecuadamente el resultado de la atención. 
+
+2. Solicitud al equipo de desarrollo 
+Como empresa, queremos contratar a un equipo de desarrollo que nos ayude a analizar esta necesidad y 
+proponer una solución tecnológica. 
+ 
+En este momento no queremos entregarles una solución definida, porque esperamos que ustedes, como 
+equipo de desarrollo, realicen inicialmente un proceso de análisis. 
+ 
+Necesitamos que comprendan nuestro problema y determinen: 
+• Quiénes participan en el proceso. 
+• Cuáles son las necesidades de cada participante. 
+• Qué información debe manejar la solución. 
+• Qué procesos deberían existir. 
+• Qué funcionalidades debería tener el sistema. 
+• Qué condiciones debe cumplir la solución. 
+• Qué aspectos pueden ser automatizados. 
+• En qué momentos una tecnología de Inteligencia Artificial podría aportar valor. 
+• Qué decisiones deberían estar controladas por reglas de negocio. 
+• Cómo debería mantenerse la trazabilidad de cada servicio. 
+Esperamos que, a partir de este análisis, el equipo pueda presentar una propuesta de solución y planificar 
+su desarrollo utilizando una metodología de trabajo adecuada. 
+3. Consideración para el equipo 
+La información presentada corresponde a la necesidad y problemática expuesta por el cliente. Por lo 
+tanto, el equipo deberá realizar el análisis y levantamiento correspondiente antes de definir la solución 
+tecnológica. 
+ 
+No se entregan previamente los requerimientos funcionales, requerimientos no funcionales, historias de 
+usuario, criterios de aceptación, arquitectura, automatizaciones o decisiones técnicas. Estos elementos 
+deberán ser identificados, analizados, propuestos y posteriormente validados por cada equipo durante el 
+desarrollo del proyecto. 
+  
+
+PARTE II. LINEAMIENTOS DEL DOCENTE PARA LA EJECUCIÓN Y EVALUACIÓN DEL 
+PROYECTO 
+1. Metodología de trabajo 
+El proyecto será desarrollado bajo una dinámica de trabajo basada en Scrum. Cada equipo deberá 
+organizar sus actividades, responsabilidades, requerimientos y avances mediante una planificación por 
+Sprint. 
+ 
+Cada Sprint tendrá una duración de dos semanas. La planificación podrá evolucionar a medida que el 
+proyecto avance; sin embargo, el equipo deberá mantener una visión general del alcance y del trabajo 
+pendiente. 
+2. Primer Sprint y primera entrega 
+El primer Sprint deberá finalizar el 16 de septiembre de 2026. 
+ 
+Este Sprint tendrá una importancia fundamental dentro del proyecto, ya que deberá consolidar una parte 
+importante del análisis y la planeación necesaria para organizar los siguientes Sprint. 
+Como mínimo, para el cierre del primer Sprint, cada equipo deberá contar con: 
+• Análisis del planteamiento y necesidad del cliente. 
+• Identificación de los actores y participantes involucrados. 
+• Levantamiento y documentación de requerimientos funcionales. 
+• Levantamiento y documentación de requerimientos no funcionales. 
+• Historias de usuario identificadas a partir del análisis. 
+• Criterios de aceptación para las historias de usuario correspondientes. 
+• Product Backlog general que represente la totalidad del trabajo identificado para el proyecto. 
+• Priorización inicial de las actividades y funcionalidades. 
+• Planeación preliminar de los Sprint posteriores. 
+El Product Backlog deberá representar la totalidad del trabajo identificado para completar el proyecto y no 
+únicamente las actividades del primer Sprint. A medida que el proyecto evolucione, el Backlog podrá 
+ajustarse, pero los cambios deberán mantenerse registrados y gestionados por el equipo. 
+3. Entregas formales 
+Para cada entrega del proyecto se deberán cumplir obligatoriamente las siguientes condiciones: 
+3.1 Envío antes del inicio de clase 
+Cada entrega deberá enviarse formalmente al correo del docente antes del inicio de la clase 
+correspondiente. La hora de recepción registrada en el correo será utilizada como evidencia para validar 
+el cumplimiento de la entrega. 
+3.2 Responsable del envío 
+La entrega deberá ser enviada por el Scrum Master del equipo. El Scrum Master será responsable de 
+garantizar que la documentación, archivos, enlaces y demás elementos requeridos se encuentren 
+incluidos correctamente. 
+
+3.3 Responsabilidad del Product Owner 
+El Product Owner será responsable de liderar el levantamiento, análisis, documentación y priorización de 
+las necesidades y requerimientos identificados a partir de la visión del cliente. Sin embargo, todo el equipo 
+deberá comprender los requerimientos y participar en el análisis de su viabilidad y alcance. 
+3.4 Sustentación con todos los integrantes 
+Para cada sustentación, el Scrum Master deberá garantizar la presencia de la totalidad de los integrantes 
+del grupo. Si uno de los estudiantes que conforman el equipo no se encuentra presente, sin importar el rol 
+asignado, la nota del equipo completo disminuirá en un 50 %. Adicionalmente, la calificación del integrante 
+ausente será de 0. 
+3.5 Sustentación de cada Sprint 
+Cada Sprint deberá ser sustentado mediante una presentación en diapositivas. La presentación deberá 
+incluir el avance general del proyecto, los requerimientos e historias de usuario cerradas y entregadas, la 
+descripción de los avances realizados, las novedades o problemas identificados y una demostración 
+funcional de los avances. 
+3.6 Pruebas previas 
+El equipo de Desarrollo/QA deberá realizar pruebas exhaustivas antes de la sustentación y garantizar que 
+las funcionalidades presentadas se encuentren operativas. Si durante la presentación se evidencian fallas, 
+errores o problemas de funcionamiento, la evaluación se verá afectada considerablemente. 
+3.7 Preparación completa 
+El equipo de Desarrollo/QA deberá garantizar que todo se encuentre funcionando y preparado antes del 
+inicio de la sustentación. Cuando el equipo sea llamado a presentar, la solución deberá estar lista para 
+conectarse, proyectarse y demostrar resultados. No se admitirán improvisaciones, configuraciones de 
+última hora o ajustes durante la presentación como consecuencia de falta de preparación. 
+3.8 Dirección de la sesión 
+El Scrum Master dirigirá la sustentación y liderará la presentación del Sprint. Cuando sea necesario, 
+solicitará la intervención de los demás integrantes del equipo. El Scrum Master deberá garantizar una 
+presentación organizada, clara y orientada a demostrar los resultados alcanzados. 
+4. Actualización y trazabilidad del Product Backlog 
+El Product Backlog deberá mantenerse actualizado durante todo el proyecto y reflejar el estado real de las 
+actividades, requerimientos e historias de usuario. 
+ 
+Se recomienda que el equipo mantenga estados claros, por ejemplo: 
+• Pendiente. 
+• En análisis. 
+• En desarrollo. 
+• En pruebas. 
+• Bloqueado. 
+• Finalizado. 
+No estará permitido actualizar el Backlog únicamente antes de una entrega. La información deberá 
+representar el avance real del equipo y permitir identificar qué actividades han sido terminadas, cuáles 
+están en proceso y cuáles presentan bloqueos. 
+
+5. Definición de terminado 
+Una actividad, requerimiento o historia de usuario solamente podrá considerarse terminada cuando: 
+• Ha sido desarrollada. 
+• Ha sido integrada cuando corresponda. 
+• Cumple con los requerimientos definidos. 
+• Cumple con los criterios de aceptación. 
+• Ha sido probada por el equipo responsable de Desarrollo/QA. 
+• No presenta fallas conocidas que impidan su funcionamiento. 
+• Se encuentra disponible para ser demostrada funcionalmente. 
+• Se encuentra correctamente actualizada como finalizada dentro del seguimiento del proyecto. 
+Una funcionalidad parcialmente desarrollada, sin validar o que no pueda demostrarse correctamente no 
+deberá presentarse como terminada. 
+6. Gestión de problemas, bloqueos y riesgos 
+Durante el desarrollo pueden presentarse dificultades técnicas, problemas de integración, cambios, 
+dependencias o bloqueos. Estas situaciones deberán ser identificadas y gestionadas oportunamente por 
+el equipo. 
+ 
+Durante la sustentación del Sprint, cuando corresponda, el equipo deberá indicar: 
+• Problema o riesgo identificado. 
+• Impacto sobre el proyecto. 
+• Actividades o historias de usuario afectadas. 
+• Acciones tomadas. 
+• Responsable del seguimiento. 
+• Plan de solución o alternativa. 
+La existencia de un problema no constituye necesariamente un incumplimiento. Sin embargo, ocultar un 
+problema, identificarlo tardíamente o no contar con acciones para gestionarlo podrá afectar la evaluación 
+del proyecto. 
+7. Gestión de cambios y control del alcance 
+El Product Backlog podrá evolucionar durante el desarrollo del proyecto. Sin embargo, toda nueva 
+necesidad, cambio o modificación deberá ser gestionada antes de incorporarse al desarrollo. 
+ 
+Como mínimo, el equipo deberá identificar, analizar y registrar el cambio, evaluar su impacto y priorizarlo 
+dentro del trabajo pendiente. 
+8. Responsabilidad de los roles y conocimiento del proyecto 
+Los roles definidos dentro del equipo establecen responsabilidades principales, pero no significan que los 
+integrantes puedan trabajar de manera aislada. 
+ 
+Todos los integrantes deberán conocer el estado general del proyecto y comprender las decisiones 
+principales relacionadas con la solución. 
+ 
+Durante la sustentación, el docente podrá solicitar la intervención de cualquier integrante para explicar un 
+requerimiento, una funcionalidad, una decisión, una prueba, un problema o un componente del proyecto. 
+
+9. Sustentación basada en evidencia 
+Los avances deberán demostrarse mediante evidencia real y funcional. No será suficiente afirmar que una 
+funcionalidad fue desarrollada. 
+ 
+El equipo deberá demostrar, según corresponda: 
+• La funcionalidad ejecutándose. 
+• La interacción del usuario con la solución. 
+• Los datos involucrados. 
+• El almacenamiento o procesamiento correspondiente. 
+• La integración con otros componentes. 
+• El resultado obtenido. 
+• El cumplimiento del requerimiento o historia de usuario. 
+10. Preparación técnica previa a la sustentación 
+Antes de iniciar la presentación, cada equipo deberá verificar como mínimo: 
+• Acceso a las cuentas y herramientas utilizadas. 
+• Disponibilidad de las aplicaciones. 
+• Conexión a las bases de datos. 
+• Funcionamiento de las APIs o servicios externos. 
+• Credenciales y permisos requeridos. 
+• Funcionamiento de automatizaciones. 
+• Disponibilidad de conexión a Internet. 
+• Disponibilidad de los archivos necesarios. 
+• Acceso a la presentación y enlaces requeridos. 
+• Funcionamiento de las funcionalidades que serán demostradas. 
+11. Calidad de las comunicaciones 
+Las comunicaciones relacionadas con entregas formales deberán mantener una estructura profesional. 
+ 
+El correo deberá incluir un asunto adecuado, identificación del grupo, identificación del Sprint o entrega, 
+una descripción breve y clara de los elementos enviados y los documentos, archivos o enlaces 
+correspondientes. 
+ 
+La entrega formal forma parte de la responsabilidad del Scrum Master. 
+12. Responsabilidad frente al trabajo en equipo 
+Los problemas de organización interna del grupo no podrán utilizarse como justificación automática para 
+el incumplimiento de una entrega. 
+ 
+Situaciones como falta de comunicación, ausencia de seguimiento, desconocimiento de responsabilidades 
+o dependencia de un único integrante deberán ser gestionadas oportunamente por el equipo. 
+ 
+El Scrum Master deberá facilitar la organización y el seguimiento, pero todos los integrantes son 
+responsables del cumplimiento de los compromisos asumidos por el grupo. 
+
+13. Consideración final 
+Este proyecto deberá desarrollarse bajo una dinámica cercana a la ejecución de un proyecto real. El 
+cumplimiento de fechas, responsabilidades, pruebas, comunicación, documentación, preparación y 
+calidad de las entregas formará parte del proceso de evaluación. 
+ 
+El propósito no es únicamente obtener una solución final, sino desarrollar durante el proceso 
+competencias relacionadas con el levantamiento de requerimientos, planificación, gestión del trabajo, 
+trabajo colaborativo, control de calidad, demostración de resultados y gestión de situaciones propias de un 
+proyecto de software. 
+Documento consolidado para el desarrollo y seguimiento del proyecto 

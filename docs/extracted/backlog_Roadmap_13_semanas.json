@@ -1,0 +1,107 @@
+[
+  [
+    "Semana",
+    "Fechas",
+    "Sprint",
+    "Objetivo principal",
+    "Entregable / demo"
+  ],
+  [
+    "1",
+    "03-09 al 16-09-2026",
+    "Sprint 1",
+    "Análisis, requerimientos, HU, criterios y backlog",
+    "Entrega Sprint 1 — 16/09"
+  ],
+  [
+    "2",
+    "17-09 al 23-09-2026",
+    "Sprint 2",
+    "Arquitectura, BD, autenticación y roles",
+    "Base técnica + acceso"
+  ],
+  [
+    "3",
+    "24-09 al 30-09-2026",
+    "Sprint 2",
+    "Integración de solicitudes y seguridad",
+    "Flujo de registro"
+  ],
+  [
+    "4",
+    "01-10 al 07-10-2026",
+    "Sprint 3",
+    "Registro, adjuntos, estados y consulta",
+    "Módulo de solicitudes"
+  ],
+  [
+    "5",
+    "08-10 al 14-10-2026",
+    "Sprint 3",
+    "Pruebas y refinamiento de solicitudes",
+    "Demo Sprint 3"
+  ],
+  [
+    "6",
+    "15-10 al 21-10-2026",
+    "Sprint 4",
+    "Integración IA y análisis inicial",
+    "IA conectada"
+  ],
+  [
+    "7",
+    "22-10 al 28-10-2026",
+    "Sprint 4",
+    "Diagnóstico remoto, clasificación y prioridad",
+    "Demo IA"
+  ],
+  [
+    "8",
+    "29-10 al 04-11-2026",
+    "Sprint 5",
+    "Escalamiento, técnicos y zonas",
+    "Módulo de asignación"
+  ],
+  [
+    "9",
+    "05-11 al 11-11-2026",
+    "Sprint 5",
+    "Reglas de asignación y disponibilidad",
+    "Demo asignación"
+  ],
+  [
+    "10",
+    "12-11 al 18-11-2026",
+    "Sprint 6",
+    "Agenda y programación de visitas",
+    "Calendario"
+  ],
+  [
+    "11",
+    "19-11 al 25-11-2026",
+    "Sprint 6",
+    "Atención, cierre y evidencias",
+    "Demo visita/cierre"
+  ],
+  [
+    "12",
+    "26-11 al 02-12-2026",
+    "Sprint 7",
+    "n8n, notificaciones, trazabilidad y reportes",
+    "Automatizaciones"
+  ],
+  [
+    "13",
+    "03-12 al 09-12-2026",
+    "Sprint 7",
+    "QA, correcciones e integración",
+    "Demo integrada"
+  ],
+  [
+    "13",
+    "10-12 al 16-12-2026",
+    "Cierre",
+    "Documentación, respaldo, validación final y preparación de sustentación",
+    "Entrega / demo final"
+  ]
+]

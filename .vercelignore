@@ -1,0 +1,6 @@
+docs
+scripts
+storage
+.env*
+node_modules
+.next

@@ -1,0 +1,193 @@
+{
+  "paragraphs": [
+    "PLATAFORMA INTELIGENTE PARA LA GESTIÓN DE SOPORTE TÉCNICO",
+    "Sprint 2 — Diseño de Arquitectura, Historias de Usuario y Requerimientos de Desempeño",
+    "Metodología: Scrum   |   Sprint 2   |   Semanas 2–3   |   17/09/2026 – 30/09/2026",
+    "Stack tecnológico: Python / Django + PostgreSQL + Bootstrap + n8n",
+    "Product Owner: Michael Andrés Perdomo Murcia",
+    "Scrum Master: Laura Valentina Zambrano Cárcamo",
+    "1. Introducción",
+    "Este documento complementa la entrega del Sprint 1 y da respuesta a los pendientes identificados por el docente para el Sprint 2: diseño de la arquitectura del sistema, diagrama de flujo del proceso, diagrama de arquitectura general, arquitectura de automatización con n8n, historias de usuario formales con criterios de aceptación, y la definición de los tiempos de respuesta esperados del sistema.",
+    "El Sprint 2 tiene como objetivo principal establecer la base técnica del proyecto: arquitectura, modelo de datos, autenticación y roles, y la integración inicial de seguridad, sobre la cual se construirán los módulos funcionales en los sprints posteriores.",
+    "2. Diseño de la Solución",
+    "2.1 Arquitectura general del sistema",
+    "La solución se organiza en cinco capas: presentación, aplicación, datos, automatización  y servicios externos. Esta separación permite escalar cada capa de forma independiente, tal como exige RNF.",
+    "Figura 1. Arquitectura general del sistema.",
+    "2.2 Modelo de datos",
+    "El modelo de datos inicial cubre el ciclo de vida completo de un caso: un usuario crea una solicitud, la cual puede tener uno o varios análisis de IA asociados, puede generar un escalamiento que produce una visita, y esta visita produce un registro de cierre. Cada solicitud puede además disparar notificaciones. Este modelo da soporte directo a la trazabilidad exigida (RF58–RF65, RNF12).",
+    "Figura 2. Modelo entidad-relación inicial.",
+    "3. Diagrama de Flujo del Proceso",
+    "El siguiente diagrama representa el flujo completo de un caso de soporte, desde que el cliente reporta la solicitud hasta su cierre y disponibilidad para consulta histórica y reportes. Por claridad se presenta en tres partes: (3a) diagnóstico remoto asistido por IA, (3b) escalamiento y asignación de técnico, y (3c) visita presencial, cierre y trazabilidad.",
+    "Figura 3a. Diagnóstico remoto asistido por IA.",
+    "Figura 3b. Escalamiento y asignación de técnico.",
+    "Figura 3c. Visita presencial, cierre y trazabilidad.",
+    "4. Arquitectura de Automatización con n8n",
+    "n8n actúa como orquestador de eventos entre la plataforma Django, el agente de IA y los canales de notificación. Se definen dos flujos principales: primero el flujo disparado al crear una nueva solicitud, que envía la información al agente de IA, procesa la respuesta, actualiza el estado en el sistema y notifica según el resultado, ya sea resuelto remotamente, escalado o error; y  el flujo de notificación ante cualquier cambio de estado, que identifica los destinatarios y envía la notificación por el canal correspondiente. Los errores de ejecución se registran para evitar pérdidas silenciosas de información (RF74). ",
+    "Figura 4a. Flujo n8n: procesamiento de una nueva solicitud.",
+    "5. Historias de Usuario — Sprint 2",
+    "A continuación se documentan de forma formal las historias correspondientes al alcance del Sprint 2 incluyendo su narrativa y criterios de aceptación verificables.",
+    "HU-04 — Arquitectura base del sistema",
+    "Épica: Arquitectura (técnica)    Prioridad: Alta    Story Points: 8    Sprint: Sprint 2",
+    "Narrativa: Como equipo de desarrollo, queremos definir y configurar la arquitectura base del sistema, para contar con una base técnica sólida y escalable sobre la cual construir las siguientes funcionalidades.",
+    "Criterios de aceptación:",
+    "1. Dado que el repositorio del proyecto configurado, cuando se levanta el entorno de desarrollo, entonces el proyecto Django corre localmente con conexión activa a PostgreSQL.",
+    "2. Dado el diseño de capas presentación, aplicación, datos, automatización, externos, cuando se documenta, entonces queda reflejado en el diagrama de arquitectura aprobado por el equipo.",
+    "3. Dado un endpoint de prueba disponible en la API, cuando n8n lo consume vía webhook, entonces se confirma la comunicación exitosa entre ambos sistemas.",
+    "4. Dado el proyecto listo para despliegue en entorno de pruebas, cuando se publica el código, entonces las variables de entorno y configuraciones sensibles no quedan expuestas en el repositorio.",
+    "HU-05 — Modelo de datos inicial",
+    "Épica: Diseño / Base de datos    Prioridad: Alto  Story Points: 5    Sprint: Sprint 2",
+    "Narrativa: Como equipo de desarrollo, queremos diseñar e implementar el modelo de datos inicial usuarios, solicitudes, análisis de IA, escalamientos, técnicos, visitas, cierres y notificaciones, para soportar el ciclo de vida completo de un caso desde su creación hasta su cierre.",
+    "Criterios de aceptación:",
+    "1. Dado el modelo entidad-relación definido, cuando se generan las migraciones de Django, entonces las tablas se crean correctamente en PostgreSQL sin errores.",
+    "2. Dado el modelo de Solicitud, cuando se relaciona con Usuario, Análisis IA, Escalamiento y Notificación, entonces las relaciones (1:N, 1:1) se respetan según lo definido en el diagrama.",
+    "3. Dado una entidad registrada en el sistema, cuando se consulta posteriormente, entonces conserva la fecha de creación y el usuario responsable del registro.",
+    "HU-01 — Registro e inicio de sesión",
+    "Épica: Usuarios y acceso    Prioridad: Alta    Story Points: 5    Sprint: Sprint 2",
+    "Narrativa: Como cliente, técnico, coordinador o administrador, quiero registrarme e iniciar sesión en la plataforma, para acceder únicamente a las funcionalidades correspondientes a mi rol.",
+    "Criterios de aceptación:",
+    "1. Dado un usuario no registrado en el formulario de registro, cuando ingresa nombre, correo, contraseña y rol solicitado válidos, entonces el sistema crea la cuenta y muestra confirmación.",
+    "2. Dado un usuario ya registrado, cuando ingresa credenciales correctas, entonces el sistema lo autentica y lo redirige al panel correspondiente a su rol.",
+    "3. Dado un usuario que ingresa credenciales incorrectas, cuando intenta iniciar sesión, entonces el sistema muestra un mensaje de error claro sin indicar cuál dato específico falló.",
+    "4. Dado un intento de registro con un correo ya existente, cuando se envía el formulario, entonces el sistema rechaza el registro e informa el conflicto.",
+    "HU-02 — Gestión de roles y permisos",
+    "Épica: Usuarios y acceso    Prioridad: Alta    Story Points: 5    Sprint: Sprint 2",
+    "Narrativa: Como administrador, quiero asignar y gestionar roles y permisos diferenciados (cliente, técnico, coordinador, administrador), para controlar qué información y funcionalidades puede ver o modificar cada usuario.",
+    "Criterios de aceptación:",
+    "1. Dado un administrador autenticado, cuando asigna un rol a un usuario, entonces el sistema actualiza los permisos asociados a ese usuario.",
+    "2. Dado un usuario con rol “cliente”, cuando intenta acceder a una funcionalidad exclusiva de “coordinador”, entonces el sistema deniega el acceso y muestra un mensaje de permisos insuficientes.",
+    "3. Dado un usuario autenticado que realiza una consulta, cuando el sistema procesa la solicitud, entonces solo devuelve datos que correspondan a su rol y relación con el caso.",
+    "4. Dado un cambio de rol realizado por un administrador, cuando se guarda el cambio, entonces el sistema registra quién lo hizo y en qué momento.",
+    "HU-03 — Protección de datos sensibles",
+    "Épica: Seguridad    Prioridad: Alta    Story Points: 8    Sprint: Sprint 2",
+    "Narrativa: Como responsable del sistema, quiero que las credenciales, evidencias, documentos de cierre y datos de ubicación estén protegidos, para garantizar la privacidad y seguridad de la información de clientes y técnicos.",
+    "Criterios de aceptación:",
+    "1. Dado el registro de la contraseña de un usuario, cuando se almacena en la base de datos, entonces se guarda cifrada (hash), nunca en texto plano.",
+    "2. Dado un archivo de evidencia o de cierre, cuando un usuario intenta acceder a él, entonces el sistema valida que tenga el rol y la relación adecuada con la solicitud antes de mostrarlo.",
+    "3. Dado un error o evento del sistema, cuando se genera el registro (log), entonces no contiene contraseñas ni datos sensibles en texto plano.",
+    "4. Dado el uso de datos personales de clientes o técnicos, cuando se procesan dentro del sistema, entonces solo se utilizan para las finalidades definidas por la empresa.",
+    "6. Gestión de Riesgos y Problemas",
+    "Siguiendo el lineamiento del docente (numeral 6), a continuación se documentan los riesgos y problemas identificados durante el desarrollo del Sprint 2, su impacto, las acciones tomadas y el plan de solución. ",
+    "7. Control de Cambios del Product Backlog",
+    "En cumplimiento del numeral 7 de los lineamientos del docente, todo cambio al Product Backlog se identifica, analiza, registra y prioriza antes de incorporarse al desarrollo. Los siguientes cambios se aplicaron durante el Sprint 2:",
+    "8. Requerimientos de Tiempo de Respuesta",
+    "Se definen a continuación los tiempos de respuesta objetivo del sistema, en atención a RNF04 y RNF05.Estos valores se validarán durante las pruebas del equipo de Desarrollo/QA en cada Sprint y servirán como referencia para puntos críticos de rendimiento y oportunidades de optimización.",
+    "8.1 Medición y seguimiento",
+    "Durante el desarrollo: uso de Django Debug Toolbar para medir tiempos de respuesta por vista o consulta.",
+    "Registro de tiempos de respuesta por endpoint mediante logging estructurado.",
+    "Las pruebas de rendimiento se ejecutan antes de cada sustentación, como parte de las pruebas exhaustivas del equipo de Desarrollo/QA.",
+    "Si un tiempo objetivo no se cumple, se documenta como hallazgo técnico, se analiza su causa y se prioriza su optimización dentro del Product Backlog."
+  ],
+  "tables": [
+    [
+      [
+        "Problema / riesgo",
+        "Impacto",
+        "HU / actividades afectadas",
+        "Acciones tomadas",
+        "Responsable",
+        "Plan de solución"
+      ],
+      [
+        "La entrega del Sprint 1 fue calificada por debajo de lo esperado: faltaron diagrama de flujo, diagrama de arquitectura, historias de usuario formales, tiempos de respuesta y arquitectura de n8n.",
+        "Riesgo de que la brecha se repita en el Sprint 2 y afecte la nota acumulada del proyecto.",
+        "Todas las HU del proyecto.",
+        "Se realizó el levantamiento completo de diseño arquitectura, modelo de datos, diagramas de flujo y n8n y se formalizaron las HU con criterios de aceptación verificables antes del corte del Sprint 2.",
+        "Product Owner  y Scrum Master",
+        "Revisión cruzada del documento contra los lineamientos del docente antes de cada entrega, usando el checklist de la sección 8."
+      ],
+      [
+        "A la fecha de este documento no existe software funcional para demostrar en vivo (solo diseño).",
+        "El docente exige 'sustentación basada en evidencia' (numeral 9): sin funcionalidad ejecutándose, el criterio no se cumple.",
+        "HU-01, HU-02, HU-03, HU-04, HU-05 (todas las del Sprint 2).",
+        "Se inició la configuración del entorno (Django + PostgreSQL) siguiendo la arquitectura definida (HU-04) y se priorizó el alcance mínimo demostrable.",
+        "Equipo de Desarrollo/QA",
+        "Priorizar HU-04 (entorno corriendo) y HU-01 (login) como mínimo viable para la sustentación; comunicar con transparencia el avance real de HU-02, HU-03 y HU-05 en vez de omitirlo."
+      ],
+      [
+        "El equipo está compuesto por solo 2 integrantes que cubren todos los roles (PO, SM y Desarrollo/QA).",
+        "Riesgo de sobrecarga de trabajo y de no alcanzar el 100% del alcance planeado por sprint.",
+        "Historias de mayor tamaño (8 SP) del backlog.",
+        "Historias divididas en tamaños pequeños (5-8 SP máx.) y priorización estricta (Must/Should/Could) en el Product Backlog.",
+        "Ambos integrantes.",
+        "Si una historia no se alcanza a cerrar, se documenta como riesgo abierto (no se oculta) y se repriorriza para el siguiente Sprint."
+      ]
+    ],
+    [
+      [
+        "Cambio",
+        "Justificación",
+        "Impacto",
+        "Prioridad",
+        "Sprint"
+      ],
+      [
+        "Adición de PB-033 — Arquitectura base del sistema (HU-04).",
+        "No existía como historia explícita en el backlog original, pese a ser un prerrequisito técnico de toda funcionalidad posterior (identificado durante el análisis de los pendientes del Sprint 1).",
+        "Bloqueante: sin esta historia ninguna otra puede desarrollarse ni desplegarse.",
+        "Alta",
+        "Sprint 2"
+      ],
+      [
+        "Adición de PB-034 — Modelo de datos inicial (HU-05).",
+        "Necesario para soportar la persistencia de HU-01, HU-02, HU-03 y las historias funcionales de los sprints siguientes.",
+        "Bloqueante para el almacenamiento y la trazabilidad de la información (RNF12).",
+        "Alta",
+        "Sprint 2"
+      ],
+      [
+        "Actualización de estado de PB-001, PB-002 y PB-029 de “En análisis” a “En desarrollo”.",
+        "Reflejar el avance real tras formalizar sus HU con criterios de aceptación, en cumplimiento del numeral 4 (el Backlog debe representar el avance real, no solo actualizarse antes de una entrega).",
+        "Ninguno negativo; mejora la trazabilidad y la visibilidad del avance del equipo.",
+        "Alta",
+        "Sprint 2"
+      ]
+    ],
+    [
+      [
+        "Operación",
+        "Tiempo objetivo",
+        "Referencia"
+      ],
+      [
+        "Autenticación / inicio de sesión",
+        "≤ 1.5 s",
+        "RNF04"
+      ],
+      [
+        "Carga del panel principal (dashboard)",
+        "≤ 2 s con hasta 50 usuarios concurrentes",
+        "RNF04"
+      ],
+      [
+        "Registro de una nueva solicitud",
+        "≤ 2 s",
+        "RF06–RF13, RNF04"
+      ],
+      [
+        "Análisis inicial del agente de IA",
+        "≤ 5 s objetivo, si se excede, se muestra indicador de procesando sin bloquear la interfaz",
+        "RNF05"
+      ],
+      [
+        "Disparo del flujo de n8n tras un evento",
+        "≤ 3 s para iniciar el flujo",
+        "RF66–RF72"
+      ],
+      [
+        "Consulta de reportes e indicadores (rango ≤ 90 días)",
+        "≤ 3 s",
+        "RF76–RF85"
+      ],
+      [
+        "Consulta de la línea de tiempo de un caso",
+        "≤ 2 s",
+        "RF64"
+      ],
+      [
+        "Disponibilidad de la plataforma",
+        "≥ 99 % en el horario de operación definido",
+        "RNF06"
+      ]
+    ]
+  ]
+}
